@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usta Deri · Satıcıya sor</title>
+  <meta name="description" content="Müşterinin satıcıya soru sorduğu ve anında yanıt aldığı mağaza sayfası.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body class="page-store">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width=".6" stroke-dasharray="1.2 1.6"/>
+        <text x="16" y="20.2" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="11" font-weight="600" fill="currentColor">ED</text>
+      </svg>
+      <span class="brand-name">EsnafDoktor</span>
+      <span class="brand-sep" aria-hidden="true"></span>
+      <span class="shop-name">Müşteri görünümü <span class="muted">· mağaza sayfası</span></span>
+    </div>
+
+    <nav class="view-switch" aria-label="Görünüm">
+      <a href="index.html" class="is-active" aria-current="page">Müşteri</a>
+      <a href="satici.html">Satıcı masası</a>
+    </nav>
+
+    <div class="topbar-right">
+      <span class="status-chip" title="Yanıtlar bu bilgisayardaki modelden gelir">
+        <span class="status-dot"></span><span class="chip-label">Yerel model</span>
+      </span>
+    </div>
+  </header>
+
+  <main class="store">
+    <!-- Ürün ve sipariş bağlamı -->
+    <section class="store-side" aria-label="Ürün ve siparişler">
+      <nav class="crumbs"><span>Usta Deri</span><span>/</span><span>Çanta</span><span>/</span><span class="muted">Deri el çantası</span></nav>
+
+      <div class="product">
+        <div class="product-visual" aria-hidden="true">
+          <svg viewBox="0 0 240 200">
+            <path d="M84 70c0-26 16-42 36-42s36 16 36 42" fill="none" stroke="#6e3b1a" stroke-width="7" stroke-linecap="round"/>
+            <path d="M46 72h148l14 104a10 10 0 0 1-10 11H42a10 10 0 0 1-10-11z" fill="#9a5528"/>
+            <path d="M46 72h148l3 22H43z" fill="#86471f"/>
+            <path d="M52 80h136M40 178h160" stroke="#e8c9a8" stroke-width="1.2" stroke-dasharray="4 4" opacity=".7"/>
+            <rect x="108" y="96" width="24" height="18" rx="3" fill="#d9b27c"/>
+            <rect x="114" y="101" width="12" height="8" rx="2" fill="#9a5528"/>
+          </svg>
+        </div>
+        <div class="product-info">
+          <h1 class="product-name">Deri el çantası</h1>
+          <p class="product-sub">Konyak · bitkisel tabaklanmış dana derisi · el dikimi</p>
+          <div class="product-row">
+            <span class="price num">3.400 TL</span>
+            <span class="rating"><span class="stars" aria-hidden="true">★★★★★</span> <span class="num">4,8</span> <span class="muted">· 1.240 değerlendirme</span></span>
+          </div>
+          <div class="seller-line">
+            <span class="seller-mark">UD</span>
+            <div>
+              <div class="seller-name">Usta Deri</div>
+              <div class="muted seller-meta" id="avgReply">Ortalama yanıt süresi ölçülüyor…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-block">
+        <div class="section-h"><h3>Siparişleriniz</h3><span class="muted" style="font-size:12px">Deniz Arslan</span></div>
+        <div class="orders" id="orders" role="radiogroup" aria-label="Hangi sipariş hakkında"></div>
+      </div>
+
+      <div class="side-block">
+        <div class="section-h"><h3>Değerlendirmeler</h3><button class="link-btn" type="button" id="writeReview">Yorum yaz</button></div>
+        <ul class="reviews" id="reviews"></ul>
+      </div>
+    </section>
+
+    <!-- Satıcıya sor -->
+    <section class="convo" aria-label="Satıcıya sor">
+      <header class="convo-head">
+        <span class="seller-mark lg">UD</span>
+        <div class="convo-who">
+          <div class="convo-name">Usta Deri</div>
+          <div class="convo-sub"><span class="live-dot"></span>Sipariş, iade ve kargo sorularınızı hemen yanıtlar</div>
+        </div>
+        <div class="convo-tools">
+          <label class="switch" title="Gelen yanıtları otomatik sesli oku">
+            <input type="checkbox" id="autoSpeak">
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+            <span class="switch-label">Sesli yanıt</span>
+          </label>
+          <label class="switch" title="Jüri için sınıflandırmayı göster">
+            <input type="checkbox" id="showAnalysis" checked>
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+            <span class="switch-label">Analizi göster</span>
+          </label>
+        </div>
+      </header>
+
+      <div class="thread" id="thread" aria-live="polite"></div>
+
+      <div class="suggestions" id="suggestions"></div>
+
+      <form class="composer" id="composer" autocomplete="off">
+        <div class="composer-top">
+          <div class="seg" role="tablist" id="modeSeg">
+            <button type="button" role="tab" data-mode="question" class="is-on">Soru sor</button>
+            <button type="button" role="tab" data-mode="review">Yorum yaz</button>
+          </div>
+          <div class="star-input" id="starInput" hidden>
+            <span class="muted">Puanınız</span>
+            <span class="star-btns" role="radiogroup" aria-label="Puan"></span>
+          </div>
+          <span class="composer-ctx" id="composerCtx"></span>
+        </div>
+        <div class="composer-box">
+          <textarea id="input" rows="1" placeholder="Satıcıya sorunuzu yazın…" aria-label="Mesajınız"></textarea>
+          <button type="button" class="icon-btn mic" id="micBtn" title="Sesle yaz">
+            <svg viewBox="0 0 24 24" class="ico"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
+          <button type="submit" class="btn btn-primary send" id="sendBtn">Gönder</button>
+        </div>
+        <p class="composer-note" id="composerNote">Mesajınız bu cihazdaki modelle işlenir; müşteri verisi dışarı gönderilmez.</p>
+      </form>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/policies.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/shared.js"></script>
+  <script src="js/store.js"></script>
+</body>
+</html>

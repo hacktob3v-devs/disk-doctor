@@ -193,11 +193,12 @@ def generate_action_card(
     ]
 
     # Punchy spoken voice summary for merchant while working
+    spoken_priority = {"acil": "acil", "yuksek": "yüksek", "orta": "normal", "dusuk": "düşük"}[priority]
+    spoken_action = suggested_action.replace(" & ", " ve ")
     voice_summary = (
-        f"Usta dikkat. {suggested_action} öneriyorum. "
-        f"Öncelik {priority}. "
-        f"Risk seviyesi yüzde {int(risk['risk_score']*100)}. "
-        f"Müşteri yanıtı hazırlandı."
+        f"Öneri: {spoken_action}. "
+        f"Öncelik {spoken_priority}. "
+        f"Risk yüzde {int(risk['risk_score']*100)}."
     )
 
     return {

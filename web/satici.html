@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EsnafDoktor · Satıcı masası</title>
+  <meta name="description" content="Esnaf için çevrimdışı müşteri mesajı ve iade uyuşmazlığı masası.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width=".6" stroke-dasharray="1.2 1.6"/>
+        <text x="16" y="20.2" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="11" font-weight="600" fill="currentColor">ED</text>
+      </svg>
+      <span class="brand-name">EsnafDoktor</span>
+      <span class="brand-sep" aria-hidden="true"></span>
+      <span class="shop-name">Usta Deri <span class="muted">· Kapalı Çarşı, Elazığ</span></span>
+    </div>
+
+    <nav class="view-switch" aria-label="Görünüm">
+      <a href="index.html">Müşteri</a>
+      <a href="satici.html" class="is-active" aria-current="page">Satıcı masası</a>
+    </nav>
+
+    <div class="topbar-right">
+      <span class="status-chip" id="netStatus" title="Tüm işlem bu bilgisayarda yapılır">
+        <span class="status-dot"></span><span id="netLabel">Yerel · ağ çağrısı yok</span>
+      </span>
+
+      <label class="model-select">
+        <span class="sr-only">Model</span>
+        <select id="modelSelect">
+          <option value="gemma3:4b">Gemma 3 · 4B</option>
+          <option value="qwen2.5:7b">Qwen 2.5 · 7B</option>
+          <option value="llama3.2:3b">Llama 3.2 · 3B</option>
+        </select>
+      </label>
+
+      <label class="switch" title="Her vakada kararı otomatik sesli oku">
+        <input type="checkbox" id="autoSpeakSeller">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+        <span class="switch-label">Sesli karar</span>
+      </label>
+
+      <button class="btn btn-ghost" id="openHow" type="button">Nasıl çalışıyor</button>
+      <span class="avatar" title="Mehmet Usta">MU</span>
+    </div>
+  </header>
+
+  <main class="desk" id="desk">
+    <!-- Gelen kutusu -->
+    <section class="pane pane-queue" aria-label="Gelen kutusu">
+      <div class="pane-head">
+        <div class="pane-title-row">
+          <h2 class="pane-title">Gelen kutusu</h2>
+          <span class="count" id="openCount"></span>
+        </div>
+        <div class="search">
+          <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="search" type="search" placeholder="Müşteri, sipariş no, kelime…" autocomplete="off">
+        </div>
+        <div class="filters" role="tablist" id="filters">
+          <button role="tab" data-filter="all" class="is-active">Tümü</button>
+          <button role="tab" data-filter="acil">Acil</button>
+          <button role="tab" data-filter="iade">İade</button>
+          <button role="tab" data-filter="kargo">Kargo</button>
+          <button role="tab" data-filter="urun">Ürün</button>
+        </div>
+      </div>
+      <ul class="queue" id="queue"></ul>
+    </section>
+
+    <!-- Vaka -->
+    <section class="pane pane-case" aria-label="Seçili mesaj" id="casePane"></section>
+
+    <!-- Karar -->
+    <aside class="pane pane-decision" aria-label="Karar önerisi" id="decisionPane"></aside>
+  </main>
+
+  <!-- Nasıl çalışıyor çekmecesi -->
+  <div class="scrim" id="scrim" hidden></div>
+  <aside class="drawer" id="howDrawer" aria-hidden="true" aria-label="Nasıl çalışıyor">
+    <div class="drawer-head">
+      <div>
+        <p class="eyebrow">Teknik dosya</p>
+        <h2 class="drawer-title">Nasıl çalışıyor</h2>
+      </div>
+      <button class="icon-btn" id="closeHow" type="button" aria-label="Kapat">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="howBody"></div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/policies.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/shared.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

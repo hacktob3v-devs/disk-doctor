@@ -59,7 +59,7 @@ graph TD
     B & J --> K["Calibrated Risk & Driver Factors"]
     
     B & H & K --> L["core/llm_gemma.py<br/>(Local Gemma Resolution Engine)"]
-    L --> M["app.py (Streamlit Dark UI)"]
+    L --> M["web/ (Müşteri sayfası + Satıcı masası)"]
     M --> N["Printable A4 Customer/Merchant Certificate (HTML)"]
 ```
 
@@ -124,11 +124,14 @@ pytest tests/ -v
 ```
 *(All 7 comprehensive and adversarial tests pass with zero network calls!)*
 
-### 3. Launch Streamlit Application
+### 3. Launch the Web Interface (prototype)
 ```bash
-streamlit run app.py
+python -m http.server 5180 --directory web
 ```
-Open `http://localhost:8501`. Toggle Wi-Fi off to verify zero-latency, 100% offline operation!
+- `http://localhost:5180/` — customer view: ask the seller or write a review, get an instant classified answer
+- `http://localhost:5180/satici.html` — seller desk: escalated messages, risk stamp, action checklist
+
+The prototype currently runs a rule-based in-browser stand-in (`web/js/engine.js`) for the `core/` pipeline. After editing `data/policies.json`, run `python scripts/build_web_policies.py`.
 
 ---
 
