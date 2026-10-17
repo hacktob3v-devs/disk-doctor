@@ -1,15 +1,23 @@
 # DiskDoctor
 
-**An offline assistant that tells a neighborhood repair shop which hard drive is about to die — before the customer loses their data.**
+**A local assistant prototype for small computer repair shops: source-backed troubleshooting, with optional disk-health evidence.**
 
 > Built at Hacktoberfest Hack Day Elazığ 2026 · DEV Week 2 challenge: *Side Hustle*
 
-A small computer repair shop asks the same questions to every customer and has to *guess* whether a disk is healthy. DiskDoctor gives the technician two things, running entirely on the shop's own laptop:
+A repair shop repeatedly collects symptoms, looks up similar cases and explains findings to customers. DiskDoctor targets that workflow on the shop's own laptop. The proposed RAG-first flow and the optional disk assessment have different implementation states:
 
-1. **Triage card** — the customer's complaint goes in, likely faulty parts, a check order and follow-up questions come out (Gemma 4, local via Ollama).
-2. **Disk health** — load a `smartctl -j` report and get a failure-risk score (TabPFN trained on real Backblaze drive failures; rule-based score for NVMe drives), plus a plain-language report for the customer.
+1. **Source-backed triage and customer report — planned.** Retrieval and local Gemma modules are not yet present in this revision; the UI falls back to mock responses.
+2. **Disk assessment — implemented and measured separately.** Load a `smartctl -j` report for a local CPU TabPFN/RF score on HDD data, or transparent NVMe health rules. Neither score is a calibrated real-world failure probability. The UI accepts reports; it does not automatically scan physical disks or read user documents.
 
-No closed APIs. No per-request cost. Works with Wi-Fi off.
+Disk-module experiments ran with network connections blocked. Full UI/Gemma offline verification remains pending. Local inference targets no cloud API charge per request; hardware and maintenance still have costs. STT and TTS are outside the first prototype.
+
+## Project status and Turkish jury guide
+
+- [Current state and local assets](docs/PROJECT_STATE.md)
+- [Detailed explanation, proposed RAG-first scope and jury questions (Turkish)](docs/PROJE_REHBERI.md)
+- [Presentation preparation PDF (Turkish)](output/pdf/DiskDoctor_Juri_Hazirlik.pdf)
+
+`USE_MOCKS=0` uses available real modules but still falls back to mocks for missing modules. The current UI's percentage-based “failure risk” wording must be corrected before making probability claims. Existing submission drafts need the same implementation/status review before publication.
 
 ## Completed: Person 1 — data and disk models
 
@@ -63,7 +71,7 @@ Upload `disk.json` in the **Disk Sağlığı** tab, or pick one of the files in 
 ## Results
 
 - Disk model test metrics: [docs/metrics.md](docs/metrics.md)
-- Local latency, measured with Wi-Fi off: [docs/timings.md](docs/timings.md)
+- Full UI/Gemma offline latency: not yet measured in this revision. Disk-module timing evidence is in [docs/metrics.md](docs/metrics.md).
 
 ## Project layout
 
@@ -81,7 +89,7 @@ docs/               Metrics and screenshots
 ## Data sources
 
 - Backblaze Drive Stats — https://www.backblaze.com/drivestats (attribution given; raw data not committed)
-- Super User Q&A via Stack Exchange Data Explorer — CC BY-SA 4.0, source link kept for every example
+- Planned Super User Q&A via Stack Exchange Data Explorer — preserve attribution and the applicable revision-specific CC BY-SA license; this dataset is not yet present.
 
 Raw data, training context and model weights are not committed. The Quick start shows how to rebuild them; for moving them to the demo laptop, see the [demo laptop handoff](docs/metrics.md#demo-laptop-handoff).
 
