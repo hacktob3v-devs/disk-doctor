@@ -116,7 +116,7 @@ st.markdown(f"""
 <div class="pitch-header">
     <div>
         <h1 class="pitch-title">🏪 EsnafDoktor — Canlı Teşhis & Sunum Masası</h1>
-        <div class="pitch-subtitle">Elazığ Kapalı Çarşı Esnafı İçin Açık Ağırlıklı (Gemma 4 + BERTurk + TabPFN) Uyuşmazlık Çözüm Merkezi</div>
+        <div class="pitch-subtitle">E-Ticaret & KOBİ Satıcıları İçin Çevrimdışı Yapay Zekâ (Gemma 4 + BERTurk + TabPFN) Uyuşmazlık ve İade Copilotu</div>
     </div>
     <div style="text-align: right;">
         <span style="background: #f1f5f9; color: {wifi_color}; font-weight: 800; font-size: 12px; padding: 6px 12px; border-radius: 9999px; border: 1px solid #cbd5e1;">
@@ -150,6 +150,13 @@ for idx, col in enumerate(sc_cols):
         st.session_state.p_dam = bool(DEMO_CASES[idx]["order"]["box_damaged_reported"])
         st.rerun()
 
+# Check query parameters for speech-to-text input from browser
+if "voice_input" in st.query_params:
+    v_in = st.query_params.get("voice_input", "")
+    if v_in:
+        st.session_state.p_msg = v_in
+    del st.query_params["voice_input"]
+
 # Default session values
 if "p_msg" not in st.session_state:
     st.session_state.p_msg = DEMO_CASES[0]["customer_message"]
@@ -161,17 +168,95 @@ if "p_msg" not in st.session_state:
     st.session_state.p_unbox = bool(DEMO_CASES[0]["order"]["unboxing_video_available"])
     st.session_state.p_dam = bool(DEMO_CASES[0]["order"]["box_damaged_reported"])
 
+if "auto_speak" not in st.session_state:
+    st.session_state.auto_speak = False
+
 st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
 # Main Stage: 2 Clean Presentation Columns
 col_input, col_result = st.columns([1.1, 1.4])
 
 with col_input:
-    st.markdown("#### 1. Girdi ve Sipariş Durumu")
+    st.markdown("#### 1. Müşteri Talebi & Sesli Girdi")
+
+    # Interactive Speech-to-Text (STT) Voice Assistant Widget
+    components.html("""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button id="micBtn" onclick="toggleSTT()" style="background: #2563eb; color: white; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">
+                🎙️
+            </button>
+            <div>
+                <div id="sttStatus" style="font-weight: 700; font-size: 13px; color: #1e293b;">Sesli Asistan: Mikrofona Konuş</div>
+                <div id="sttSub" style="font-size: 11px; color: #64748b;">Türkçe müşteri mesajını sesli iletmek için butona tıklayın.</div>
+            </div>
+        </div>
+        <div id="pulseBadge" style="display: none; background: #fee2e2; color: #b91c1c; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px;">
+            🔴 DİNLİYOR...
+        </div>
+    </div>
+
+    <script>
+    var recognizing = false;
+    var recognition = null;
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRec();
+        recognition.lang = 'tr-TR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = function() {
+            recognizing = true;
+            document.getElementById('micBtn').style.background = '#dc2626';
+            document.getElementById('pulseBadge').style.display = 'block';
+            document.getElementById('sttStatus').innerText = 'Dinleniyor... Şimdi Konuşun';
+            document.getElementById('sttSub').innerText = 'Örn: "Kargom kırık geldi paramı iade edin"';
+        };
+
+        recognition.onresult = function(event) {
+            var text = event.results[0][0].transcript;
+            document.getElementById('sttStatus').innerText = 'Algılandı: "' + text.substring(0, 30) + '..."';
+            document.getElementById('sttSub').innerText = 'Sistem kararı hesaplanıyor...';
+            // Send back to Streamlit via parent query param reload
+            window.parent.location.search = '?voice_input=' + encodeURIComponent(text);
+        };
+
+        recognition.onerror = function(event) {
+            recognizing = false;
+            document.getElementById('micBtn').style.background = '#2563eb';
+            document.getElementById('pulseBadge').style.display = 'none';
+            document.getElementById('sttStatus').innerText = 'Hata: ' + event.error;
+        };
+
+        recognition.onend = function() {
+            recognizing = false;
+            document.getElementById('micBtn').style.background = '#2563eb';
+            document.getElementById('pulseBadge').style.display = 'none';
+        };
+    } else {
+        document.getElementById('sttStatus').innerText = 'Tarayıcıda Web Speech API desteği yok.';
+    }
+
+    function toggleSTT() {
+        if (!recognition) {
+            alert('Tarayıcınız Web Speech API desteklemiyor. Lütfen Chrome veya Edge kullanın.');
+            return;
+        }
+        if (recognizing) {
+            recognition.stop();
+        } else {
+            recognition.start();
+        }
+    }
+    </script>
+    """, height=65)
+
     cur_msg = st.text_area(
-        "Müşterinin Mesajı:",
+        "Müşterinin Yazılı Mesajı:",
         value=st.session_state.p_msg,
-        height=140
+        height=130
     )
 
     with st.expander("Sipariş Bilgilerini Düzenle (Tablo Verisi)", expanded=False):
@@ -186,7 +271,11 @@ with col_input:
         v_unbox = c6.checkbox("Açılış Videosu Var", value=st.session_state.p_unbox)
         v_dam = st.checkbox("Paket Hasarlı Bildirildi", value=st.session_state.p_dam)
 
-    btn_eval = st.button("⚡ Analiz Et & Karar Ver (Gemma 4)", type="primary", use_container_width=True)
+    col_btn, col_auto_tts = st.columns([1.3, 1.1])
+    with col_btn:
+        btn_eval = st.button("⚡ Analiz Et & Karar Ver (Gemma 4)", type="primary", use_container_width=True)
+    with col_auto_tts:
+        st.session_state.auto_speak = st.checkbox("🔊 Otomatik Seslendir", value=st.session_state.auto_speak)
 
 with col_result:
     st.markdown("#### 2. Gemma 4 Kararı ve Aksiyon Planı")
@@ -207,7 +296,7 @@ with col_result:
     nlu_res = classify_text(cur_msg)
     rag_res = retrieve_policies(cur_msg, top_k=2)
     risk_res = evaluate_order_risk(order_obj, sentiment_score=nlu_res["sentiment_score"])
-    action_res = generate_action_card("Elazığ Kapalı Çarşı Butik", cur_msg, nlu_res, rag_res, risk_res)
+    action_res = generate_action_card("E-Ticaret Butik Satıcısı", cur_msg, nlu_res, rag_res, risk_res)
 
     latency_s = time.perf_counter() - t_start
 
@@ -254,28 +343,37 @@ with col_result:
     </a>
     """, unsafe_allow_html=True)
 
-    # TTS Voice
+    # Text-to-Speech (TTS) Voice Engine
     v_clean = action_res["voice_summary_tr"].replace("'", "\\'").replace('"', '\\"')
+    auto_speak_js = "true" if st.session_state.auto_speak else "false"
+
     with a_col2:
         components.html(f"""
-        <button onclick="speak()" style="width: 100%; background: #0f172a; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer;">
-            🔊 Esnaf İçin Oku
+        <button id="ttsBtn" onclick="speakText()" style="width: 100%; background: #0f172a; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer;">
+            🔊 Asistan Kararını Oku
         </button>
         <script>
-        function speak() {{
+        var autoPlay = {auto_speak_js};
+        function speakText() {{
             if ('speechSynthesis' in window) {{
                 window.speechSynthesis.cancel();
                 var u = new SpeechSynthesisUtterance("{v_clean}");
                 u.lang = 'tr-TR';
+                u.rate = 1.05;
                 window.speechSynthesis.speak(u);
             }}
+        }}
+        if (autoPlay) {{
+            window.addEventListener('load', function() {{
+                setTimeout(speakText, 300);
+            }});
         }}
         </script>
         """, height=38)
 
     # HTML Report Download
     rep_html = generate_printable_html_report(
-        "Elazığ Kapalı Çarşı Butik", cur_msg, order_obj, nlu_res, rag_res, risk_res, action_res, latency_s
+        "E-Ticaret Butik Mağazası", cur_msg, order_obj, nlu_res, rag_res, risk_res, action_res, latency_s
     )
     a_col3.download_button(
         "📄 A4 Servis Raporu",

@@ -34,10 +34,16 @@ Bu belge, jüri sunumu sırasında gelebilecek en kritik 10 soruya verilecek do�
 
 ---
 
-### Soru 4: TabPFN burada ne iş yapıyor, LLM'den farkı ne?
+### Soru 4: TabPFN burada ne iş yapıyor, LLM'den farkı ne ve hangi verilere dayanıyor?
 > **Cevap:**  
-> LLM'ler metin işleme ve dil anlama için optimize edilmiştir; ancak sipariş tutarı, teslimat günü, müşterinin geçmiş iade oranı gibi sayısal/tabüler verilerden güvenilir olasılık dağılımı çıkaramaz, sayı uydurur.  
-> TabPFN, CPU üzerinde 20 ms altında çalışarak siparişin uyuşmazlık ve iade suistimali riskini matematiksel olarak kalibre eder ve satıcıya objektif bir risk skoru sunar.
+> 1. **Resmi Kategori:** Yarışma şartnamesinde (Sayfa 20) doğrudan **200$ ödüllü 'Best Use of TabPFN'** partner kategorisi bulunmaktadır.  
+> 2. **Hangi Güvenilir Veriler?:** LLM'ler metin okur ama arka plandaki gerçeği bilmez. TabPFN ise sipariş sistemindeki 5 doğrulanmış tablo verisini inceler:
+>    - `Sipariş Tutarı`: 100 TL'lik kupa mı, 5.800 TL'lik mont mu?
+>    - `Teslimat Süresi`: Taze teslimat mı, 14 günlük yasal sürenin son dakikası mı?
+>    - `Müşteri Geçmiş İade Oranı`: Sadık müşteri mi, sistematik iade istismarcısı mı?
+>    - `Kutu Açılış Videosu`: Var mı, yok mu?
+>    - `Kargo Hasar Tutanağı`: Var mı, yok mu?
+> 3. **Karar Farkı:** TabPFN bu parametreleri CPU üzerinde 18 milisaniyede işleyerek matematiksel risk skoru üretir. Gemma bu risk kırmızı çıktığında müşteriye körü körüne para iadesi yapmaz; satıcıyı sahte iadelerden koruyacak inceleme adımlarını devreye sokar.
 
 ---
 
