@@ -47,8 +47,14 @@ KEYWORD_CATEGORY_MAP: dict[str, CategoryType] = {
     "kirik": "urun",
     "bozuk": "urun",
     "garanti": "urun",
+    "dikis": "urun",
+    "sokuk": "urun",
+    "ayipli": "urun",
+    "yirtik": "urun",
     "kalite": "urun",
     "odeme": "teknik",
+    "iki kere": "teknik",
+    "cekim": "teknik",
     "sms": "teknik",
     "sifre": "teknik",
     "kupon": "teknik",
@@ -192,14 +198,15 @@ def classify_text(text: str) -> NLUResult:
         matched_intent = "tesekkur"
         intent_conf = 0.96
         sentiment = 0.88
+    # Soft complaint markers win over question words ("kargom nerede, teslim edilmedi")
+    elif any(neg in norm for neg in ["gecik", "gelmedi", "yapilmadi", "kirik", "bozuk", "olmadi", "hata", "sokuk", "ayipli"]):
+        matched_intent = "sikayet"
+        intent_conf = 0.84
+        sentiment = -0.65
     elif any(q in norm for q in ["?", "nasil", "nerede", "kac gun", "ogrenebilir", "sart"]):
         matched_intent = "bilgi_talebi"
         intent_conf = 0.86
         sentiment = 0.0
-    elif any(neg_soft in norm for neg in ["gecikti", "gelmedi", "kirik", "bozuk", "olmadi", "hata"]):
-        matched_intent = "sikayet"
-        intent_conf = 0.84
-        sentiment = -0.65
 
     latency = (time.perf_counter() - t0) * 1000
     return {
