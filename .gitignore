@@ -11,6 +11,9 @@ data/*
 models/*
 !models/.gitkeep
 
+# Interview notes contain personal info — never committed
+post/tamirci_notlari.md
+
 # Editors / OS
 .vscode/
 .idea/

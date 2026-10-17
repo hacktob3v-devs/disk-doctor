@@ -13,17 +13,48 @@ No closed APIs. No per-request cost. Works with Wi-Fi off.
 
 ## Quick start
 
+Requirements: Python 3.10+, [Ollama](https://ollama.com), and [smartmontools](https://www.smartmontools.org) if you want to read your own disk.
+
 ```bash
 git clone https://github.com/hacktob3v-devs/disk-doctor.git
 cd disk-doctor
 python -m venv .venv
-.venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
+.venv\Scripts\activate                 # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-ollama pull <gemma4-model>      # set the same name in DD_MODEL
+ollama pull <gemma4-tag>               # set the same name in DD_MODEL
+```
+
+Prepare the disk model once (download one quarter of [Backblaze Drive Stats](https://www.backblaze.com/drivestats) and unzip it into `data/backblaze_raw/`):
+
+```bash
+python -m scripts.prepare_backblaze data/backblaze_raw
+python -m scripts.train_disk_model
+```
+
+Run the app with the real models:
+
+```powershell
+$env:USE_MOCKS="0"                     # macOS/Linux: export USE_MOCKS=0
 streamlit run app.py
 ```
 
-The UI runs on mock data until the real modules are ready (`USE_MOCKS=1` is the default). Set `USE_MOCKS=0` to use the real models.
+Without `USE_MOCKS=0` the UI runs on mock data, which is handy for working on the interface alone.
+
+### Read your own disk
+
+Run as administrator:
+
+```bash
+smartctl --scan
+smartctl -j -a /dev/sda > disk.json    # on Windows PowerShell use: cmd /c "smartctl -j -a /dev/sda > disk.json"
+```
+
+Upload `disk.json` in the **Disk Sağlığı** tab, or pick one of the files in `demo/`.
+
+## Results
+
+- Disk model test metrics: [docs/metrics.md](docs/metrics.md)
+- Local latency, measured with Wi-Fi off: [docs/timings.md](docs/timings.md)
 
 ## Project layout
 
@@ -43,7 +74,7 @@ docs/               Metrics and screenshots
 - Backblaze Drive Stats — https://www.backblaze.com/drivestats (attribution given; raw data not committed)
 - Super User Q&A via Stack Exchange Data Explorer — CC BY-SA 4.0, source link kept for every example
 
-Raw data and trained models are not committed; see `scripts/download_data.md`.
+Raw data and trained models are not committed; the Quick start shows how to rebuild them.
 
 ## Limitations
 
