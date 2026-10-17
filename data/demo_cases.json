@@ -1,0 +1,62 @@
+[
+  {
+    "id": "DEMO_01",
+    "title": "📦 Kargo Hasarlı / Kırık Ürün (Acil Kargo Dosyası)",
+    "description": "Kutusu ezilmiş, kurye tutanak bırakmadan gitmiş müşteri şikayeti.",
+    "customer_message": "Kargom az önce geldi ama kutu resmen ezilmiş, içindeki porselen takım da kırılmış! Kurye kapıya bırakıp kaçtı hemen, ne yapmam gerekiyor acil dönüş bekliyorum?",
+    "order": {
+      "order_id": "TR-982341",
+      "order_amount_tl": 1450.0,
+      "delivery_days": 3,
+      "past_orders_count": 4,
+      "past_returns_count": 0,
+      "unboxing_video_available": false,
+      "box_damaged_reported": true
+    }
+  },
+  {
+    "id": "DEMO_02",
+    "title": "🚨 Yüksek Riskli İade Şüphesi (TabPFN Kırmızı Alarm)",
+    "description": "Pahalı ürün, geçmişte sürekli iade yapan şüpheli müşteri profili.",
+    "customer_message": "Aldığım 5800 liralık deri ceketin dikişleri berbat, hemen paramı kartıma iade edin yoksa Tüketici Hakem Heyetine gidip sizi rezil ederim!",
+    "order": {
+      "order_id": "TR-441092",
+      "order_amount_tl": 5800.0,
+      "delivery_days": 7,
+      "past_orders_count": 2,
+      "past_returns_count": 2,
+      "unboxing_video_available": false,
+      "box_damaged_reported": false
+    }
+  },
+  {
+    "id": "DEMO_03",
+    "title": "🟢 Güvenli Beden Değişimi & Cayma Hakkı (Sadık Müşteri)",
+    "description": "14 gün içinde beden uymadığı için değişim isteyen güvenli müşteri.",
+    "customer_message": "Merhabalar kolay gelsin, aldığım keten pantolonun bedeni biraz dar geldi. 14 günlük sürem dolmadan 42 beden ile değişim yapabilir miyiz acaba?",
+    "order": {
+      "order_id": "TR-128955",
+      "order_amount_tl": 620.0,
+      "delivery_days": 2,
+      "past_orders_count": 14,
+      "past_returns_count": 1,
+      "unboxing_video_available": true,
+      "box_damaged_reported": false
+    }
+  },
+  {
+    "id": "DEMO_04",
+    "title": "⭐ Hızlı Teslimat & Teşekkür Mesajı (Pozitif Geri Bildirim)",
+    "description": "Siparişi hızlı gelen ve memnuniyetini bildiren müşteri.",
+    "customer_message": "Siparişim 24 saat geçmeden Elazığ'a ulaştı, özenli paketleme ve hediyeniz için çok teşekkürler, harika esnafsınız!",
+    "order": {
+      "order_id": "TR-872134",
+      "order_amount_tl": 480.0,
+      "delivery_days": 1,
+      "past_orders_count": 6,
+      "past_returns_count": 0,
+      "unboxing_video_available": false,
+      "box_damaged_reported": false
+    }
+  }
+]

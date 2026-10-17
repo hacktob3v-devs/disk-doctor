@@ -1,0 +1,15 @@
+{
+  "iade_weight": 5.0,
+  "kategori_accuracy": 0.7153846153846154,
+  "iade_precision": 0.8947368421052632,
+  "iade_recall": 0.7727272727272727,
+  "iade_f1": 0.8292682926829268,
+  "niyet_accuracy": 0.8256410256410256,
+  "class_weight_kategori": {
+    "kargo": 1.0,
+    "iade": 5.0,
+    "urun": 1.0,
+    "teknik": 1.0,
+    "genel": 1.0
+  }
+}
