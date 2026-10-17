@@ -11,6 +11,15 @@ A small computer repair shop asks the same questions to every customer and has t
 
 No closed APIs. No per-request cost. Works with Wi-Fi off.
 
+## Completed: Person 1 — data and disk models
+
+- Prepared real Backblaze Q2 2026 data: 1,164 snapshots one day before a recorded failure and 3,000 controls, with one row per drive. Fixed control-date sampling and kept drive identities separate between training and test.
+- Implemented local CPU TabPFN-v2 inference with a RandomForest fallback, validated ATA/NVMe parsing, and transparent NVMe health rules.
+- Added two heldout HDD demos and a genuine read-only NVMe capture with unique device identifiers removed. **63 synthetic tests pass**; model evaluation and the three-demo journey also ran with socket connections blocked.
+- Measured TabPFN ROC-AUC: **0.927** on 1,041 heldout drives; **0.879** in a separate 1,124-drive June calendar check. Full results, historical corrections and setup/handoff notes: [evaluation report](docs/metrics.md).
+
+Person 1 modules are ready for team integration. Full Gemma/Streamlit integration and a repair-shop user trial remain pending; these scores are not calibrated real-world failure probabilities.
+
 ## Quick start
 
 Requirements: Python 3.10+, [Ollama](https://ollama.com), and [smartmontools](https://www.smartmontools.org) if you want to read your own disk.
@@ -74,11 +83,11 @@ docs/               Metrics and screenshots
 - Backblaze Drive Stats — https://www.backblaze.com/drivestats (attribution given; raw data not committed)
 - Super User Q&A via Stack Exchange Data Explorer — CC BY-SA 4.0, source link kept for every example
 
-Raw data and trained models are not committed; the Quick start shows how to rebuild them.
+Raw data, training context and model weights are not committed. The Quick start shows how to rebuild them; for moving them to the demo laptop, see the [demo laptop handoff](docs/metrics.md#demo-laptop-handoff).
 
 ## Limitations
 
-_To be written: Backblaze data comes from data-center drives, NVMe drives use a rule-based score, and the triage is a suggestion, not a replacement for the technician._
+Backblaze data-center drives do not establish performance on repair-shop laptops. The calendar evaluation is retrospective, and performance drops on later dates. NVMe uses heuristic rules, not a learned failure-probability model. Results support a prototype and a technician's second opinion; field effectiveness remains unverified.
 
 ## License
 

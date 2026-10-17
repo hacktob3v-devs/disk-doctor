@@ -1,6 +1,7 @@
 """DiskDoctor — Streamlit arayüzü.  Çalıştır:  streamlit run app.py"""
 import datetime
 import html
+import importlib
 import json
 import os
 import socket
@@ -10,20 +11,30 @@ from pathlib import Path
 import markdown
 import streamlit as st
 
-USE_MOCKS = os.getenv("USE_MOCKS", "1") == "1"
+from core import mocks
 
-if USE_MOCKS:
-    from core import mocks as triage_mod, mocks as parser_mod, mocks as disk_mod
-    from core import mocks as nvme_mod, mocks as report_mod, mocks as llm_mod
-    MODEL_NAME = "mock"
-else:
-    from core import triage as triage_mod          # Kişi 2
-    from core import report as report_mod          # Kişi 2
-    from core import llm as llm_mod                # Kişi 2
-    from core import smart_parser as parser_mod    # Kişi 1
-    from core import disk_model as disk_mod        # Kişi 1
-    from core import nvme_rules as nvme_mod        # Kişi 1
-    from core.config import MODEL as MODEL_NAME
+USE_MOCKS = os.getenv("USE_MOCKS", "1") == "1"
+MOCKED: list[str] = []   # gerçek modülü henüz olmadığı için mock kullanılanlar
+
+
+def load(name: str):
+    """USE_MOCKS=0 iken gerçek modülü yükler; henüz yoksa o modül için mock'a düşer."""
+    if USE_MOCKS:
+        return mocks
+    try:
+        return importlib.import_module(f"core.{name}")
+    except ImportError:
+        MOCKED.append(name)
+        return mocks
+
+
+triage_mod = load("triage")        # Kişi 2
+report_mod = load("report")        # Kişi 2
+llm_mod = load("llm")              # Kişi 2
+parser_mod = load("smart_parser")  # Kişi 1
+disk_mod = load("disk_model")      # Kişi 1
+nvme_mod = load("nvme_rules")      # Kişi 1
+MODEL_NAME = getattr(load("config"), "MODEL", "mock")
 
 DEMO_DIR = Path("demo")
 EXAMPLES = [
@@ -214,3 +225,5 @@ with st.sidebar:
     st.caption(f"Model: {MODEL_NAME} · yerel (Ollama)")
     if USE_MOCKS:
         st.warning("Mock modu açık (USE_MOCKS=1)")
+    elif MOCKED:
+        st.warning("Henüz hazır olmayan, mock ile çalışan modüller: " + ", ".join(MOCKED))

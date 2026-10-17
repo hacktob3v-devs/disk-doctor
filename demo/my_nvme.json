@@ -1,0 +1,53 @@
+{
+  "_source": "Genuine local read-only smartctl NVMe capture; serial and other unique device identifiers removed.",
+  "_provenance": {
+    "kind": "live_capture",
+    "command": "smartctl -j -a -d nvme /dev/sda",
+    "smartctl_version": [
+      7,
+      5
+    ],
+    "identifiers": "allowlisted export; original serial/WWN/EUI/NGUID not included"
+  },
+  "device": {
+    "name": "/dev/sda",
+    "type": "nvme",
+    "protocol": "NVMe"
+  },
+  "model_name": "KINGSTON SNV3S500G",
+  "serial_number": "DEMO-NVME-001",
+  "nvme_smart_health_information_log": {
+    "critical_warning": 0,
+    "media_errors": 0,
+    "available_spare": 100,
+    "available_spare_threshold": 10,
+    "percentage_used": 4,
+    "power_on_hours": 1491,
+    "power_cycles": 396,
+    "unsafe_shutdowns": 9,
+    "num_err_log_entries": 0,
+    "data_units_read": 20600214,
+    "data_units_written": 16728622,
+    "host_reads": 334072218,
+    "host_writes": 246867246,
+    "controller_busy_time": 5611,
+    "warning_temp_time": 0,
+    "critical_comp_time": 0,
+    "temperature": 34
+  },
+  "user_capacity": {
+    "bytes": 500107862016
+  },
+  "power_on_time": {
+    "hours": 1491
+  },
+  "temperature": {
+    "current": 34
+  },
+  "smart_status": {
+    "passed": true
+  },
+  "smartctl": {
+    "exit_status": 0
+  }
+}

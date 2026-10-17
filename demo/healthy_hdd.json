@@ -1,0 +1,82 @@
+{
+  "_source": "Backblaze Drive Stats heldout CSV snapshot converted to smartctl JSON shape; NOT a live disk read.",
+  "_provenance": {
+    "source_url": "https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data",
+    "sample_sha256": "c14bd4b2641f1d82b87aa23cdcb0d99295c4bd2f9f640a98fc8cbb2f729da515",
+    "snapshot_date": "2026-04-27",
+    "target_label": 0,
+    "lead_days": 1,
+    "recorded_failure_date": null,
+    "selection": "Illustrative heldout example selected by counters, not a representative accuracy test.",
+    "original_serial": "redacted"
+  },
+  "device": {
+    "name": "/dev/sda",
+    "type": "sat",
+    "protocol": "ATA"
+  },
+  "model_name": "ST14000NM0138",
+  "serial_number": "DEMO-HEALTHY_HDD",
+  "ata_smart_attributes": {
+    "table": [
+      {
+        "id": 5,
+        "name": "Reallocated_Sector_Ct",
+        "raw": {
+          "value": 0
+        }
+      },
+      {
+        "id": 9,
+        "name": "Power_On_Hours",
+        "raw": {
+          "value": 47651
+        }
+      },
+      {
+        "id": 187,
+        "name": "Reported_Uncorrect",
+        "raw": {
+          "value": 0
+        }
+      },
+      {
+        "id": 188,
+        "name": "Command_Timeout",
+        "raw": {
+          "value": 0
+        }
+      },
+      {
+        "id": 194,
+        "name": "Temperature_Celsius",
+        "raw": {
+          "value": 34
+        }
+      },
+      {
+        "id": 197,
+        "name": "Current_Pending_Sector",
+        "raw": {
+          "value": 0
+        }
+      },
+      {
+        "id": 198,
+        "name": "Offline_Uncorrectable",
+        "raw": {
+          "value": 0
+        }
+      }
+    ]
+  },
+  "user_capacity": {
+    "bytes": 14000519643136
+  },
+  "power_on_time": {
+    "hours": 47651
+  },
+  "temperature": {
+    "current": 34
+  }
+}
