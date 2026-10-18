@@ -140,7 +140,7 @@ def build_pdf():
 
     # Title & Header
     story.append(Paragraph("EsnafDoktor (MerchantDoctor) — Teknik Rapor", title_style))
-    story.append(Paragraph("Açık Ağırlıklı Gemma 4, Fine-Tuned BERTurk & TabPFN Tabanlı Çevrimdışı E-Ticaret ve İade Karar Asistanı", subtitle_style))
+    story.append(Paragraph("Açık Ağırlıklı Gemma 3 4B ve Hibrit RAG ile Satıcıya Sorulan Sorulara Saniyeler İçinde Kurala Dayalı Yanıt", subtitle_style))
     story.append(HRFlowable(width="100%", thickness=1.5, color=ACCENT, spaceAfter=10))
 
     # Meta Info Table
@@ -151,9 +151,9 @@ def build_pdf():
             Paragraph("<b>Lisans:</b> MIT (Tamamen Açık Kaynak)", table_cell)
         ],
         [
-            Paragraph("<b>Hedef Ödüller:</b> Gemma ($200), TabPFN ($200), Open Source ($200)", table_cell),
-            Paragraph("<b>Altyapı:</b> %100 Çevrimdışı (0.00 TL API)", table_cell),
-            Paragraph("<b>Test Durumu:</b> 7/7 Geçti (%100 Başarı)", table_cell)
+            Paragraph("<b>Hedef Ödüller:</b> Gemma ($200), Open Source ($200), TabPFN ($200)", table_cell),
+            Paragraph("<b>Altyapı:</b> Yerel çıkarım, 0.00 TL API", table_cell),
+            Paragraph("<b>Test Durumu:</b> 7/7 birim testi geçti", table_cell)
         ]
     ]
     meta_table = Table(meta_data, colWidths=[200, 150, 165])
@@ -168,13 +168,12 @@ def build_pdf():
     # 1. Executive Summary & Problem
     story.append(Paragraph("1. Yönetici Özeti ve Problem Tanımı", h1_style))
     story.append(Paragraph(
-        "Elazığ Kapalı Çarşı ve yerel sanayi sitelerinde Trendyol, Hepsiburada ve WhatsApp üzerinden online satış yapan "
-        "bağımsız butik esnafı, her akşam sipariş paketleme saatlerinde 150'den fazla uyuşmazlık mesajı almaktadır. "
-        "Müşteri mesajlarına geç yanıt verilmesi pazar yeri mağaza puanını düşürürken; her iade talebinin koşulsuz kabul edilmesi "
-        "kullanılmış/hijyen etiketi yırtılmış ürünlerde esnafa doğrudan binlerce lira zarar yazmaktadır. "
-        "Kurumsal müşteri hizmetleri araçları (Zendesk, Salesforce AI vb.) ise çağrı başına <b>$0.05</b> talep etmekte olup "
-        "küçük esnaf için aylık <b>~15.000 TL</b> ek maliyet anlamına gelmektedir. "
-        "<b>EsnafDoktor</b>, dükkandaki standart bir bilgisayarda internet olmadan çalışan, açık ağırlıklı yapay zekâ asistanıdır.",
+        "E-ticaret sitelerinde satıcıya sorulan sorular (kargo nerede, beden değişimi, çift çekim, iade süresi) çoğu zaman saatlerce "
+        "cevapsız kalır. Trendyol, Hepsiburada ve Instagram üzerinden satış yapan küçük satıcı hem siparişi paketler hem de günde yüzlerce "
+        "mesaja yetişmeye çalışır. Geç yanıt pazar yeri mağaza puanını düşürür; her iade talebinin koşulsuz kabulü ise kullanılmış veya "
+        "etiketi sökülmüş ürünlerde doğrudan zarar yazar. Mesaj başına ücretli bulut yapay zekâ servisleri ise maliyeti mesaj sayısıyla büyütür. "
+        "<b>EsnafDoktor</b>, satıcının kendi bilgisayarında çalışan açık ağırlıklı bir modelle rutin soruları saniyeler içinde, "
+        "mağazanın kendi kuralına dayanarak yanıtlar; riskli vakaları ise gerekçesiyle satıcıya iletir.",
         body_style
     ))
 
@@ -185,31 +184,31 @@ def build_pdf():
             Paragraph("Modül", table_header),
             Paragraph("Kullanılan Teknoloji", table_header),
             Paragraph("Görevi ve Sisteme Katkısı", table_header),
-            Paragraph("Çıkarım Süresi (CPU)", table_header)
+            Paragraph("Süre (ısınmış)", table_header)
         ],
         [
             Paragraph("<b>NLU Motoru</b>", table_cell),
-            Paragraph("BERTurk Fine-Tuned (442MB safetensors)", table_cell),
-            Paragraph("Müşteri mesajını 5 kategori (kargo, iade, ürün, teknik, genel) ve 3 niyete sınıflandırır.", table_cell),
-            Paragraph("< 40 ms", table_cell)
+            Paragraph("Türkçe anahtar kelime sınıflandırıcı (ince ayarlı BERTurk yuvası hazır)", table_cell),
+            Paragraph("Mesajı 3 niyete (şikâyet, bilgi, teşekkür) ayırır. Kategori, daha isabetli olan kural eşleşmesinden alınır.", table_cell),
+            Paragraph("< 1 ms", table_cell)
         ],
         [
-            Paragraph("<b>2026 Hibrit RAG</b>", table_cell),
-            Paragraph("Okapi BM25 + Multilingual-E5 + RRF + Cross-Encoder", table_cell),
-            Paragraph("16 esnaf politikasını anahtar kelime ve anlamsal vektör füzyonuyla getirir; Cross-Encoder ile doğrular.", table_cell),
-            Paragraph("~90 ms", table_cell)
+            Paragraph("<b>Hibrit RAG</b>", table_cell),
+            Paragraph("BM25 + multilingual-e5-small + RRF + Cross-Encoder ağırlığı", table_cell),
+            Paragraph("16 mağaza kuralından doğrusunu bulur; kural düzeyinde %95,2 isabet.", table_cell),
+            Paragraph("~440 ms (CPU)", table_cell)
         ],
         [
             Paragraph("<b>Tabular Risk</b>", table_cell),
-            Paragraph("TabPFN (Prior Labs Foundation Model)", table_cell),
-            Paragraph("Sipariş tutarı, teslimat gecikmesi ve geçmiş iade oranından suistimal riskini (%0-%100) kalibre eder.", table_cell),
-            Paragraph("< 20 ms", table_cell)
+            Paragraph("TabPFN entegrasyonu; lisans onayına kadar kalibre lojistik formül", table_cell),
+            Paragraph("Tutar, teslimat, iade geçmişi, açılış videosu ve hasar bildiriminden iade suistimali riskini hesaplar.", table_cell),
+            Paragraph("< 1 ms", table_cell)
         ],
         [
             Paragraph("<b>Akıl Yürütme & Aksiyon</b>", table_cell),
-            Paragraph("Google DeepMind Gemma 4 (Yerel Ollama / Şablon)", table_cell),
-            Paragraph("NLU, RAG ve TabPFN çıktılarını sentezleyerek adım adım Esnaf Karar Kartı ve müşteri yanıtı üretir.", table_cell),
-            Paragraph("< 1.2 sn", table_cell)
+            Paragraph("Gemma 3 4B (Ollama, yerel GPU) + dayanak denetimi", table_cell),
+            Paragraph("Yalnızca bulunan kurala dayanarak müşteriye yanıt yazar; kuralda geçmeyen sayı içeren yanıt reddedilir.", table_cell),
+            Paragraph("~1,4 sn", table_cell)
         ]
     ]
     arch_table = Table(arch_data, colWidths=[90, 130, 215, 80])
@@ -228,13 +227,13 @@ def build_pdf():
         [Paragraph("Kriter", table_header), Paragraph("Kapalı API (OpenAI GPT-4o / Claude)", table_header), Paragraph("EsnafDoktor (Yerel Açık Kaynak)", table_header)],
         [
             Paragraph("<b>Değişken Maliyet</b>", table_cell),
-            Paragraph("İstek başına $0.03-$0.08. Ayda 200 mesaj alan esnaf için ~15.000 TL fatura.", table_cell),
+            Paragraph("Mesaj başına ücret; maliyet mesaj sayısıyla büyür.", table_cell),
             Paragraph("<b>0.00 TL.</b> Cihaz üzerinde sınırsız ve ücretsiz çalışır.", table_cell)
         ],
         [
             Paragraph("<b>İnternet Bağımlılığı</b>", table_cell),
-            Paragraph("Bağlantı koptuğunda tamamen çöker; taş tonozlu çarşıda çalışamaz.", table_cell),
-            Paragraph("<b>%100 Çevrimdışı.</b> Wi-Fi kapatıldığında sıfır kayıpla çalışmaya devam eder.", table_cell)
+            Paragraph("Bağlantı koptuğunda yanıt üretilemez.", table_cell),
+            Paragraph("<b>Yerel çıkarım.</b> Modeller indirildikten sonra Wi-Fi kapalıyken de yanıt verir.", table_cell)
         ],
         [
             Paragraph("<b>Veri Gizliliği (KVKK)</b>", table_cell),
@@ -242,9 +241,9 @@ def build_pdf():
             Paragraph("<b>Sıfır Sızıntı.</b> Tüm müşteri kayıtları yerel sabit diskte kalır.", table_cell)
         ],
         [
-            Paragraph("<b>Tablo Verisi Anlama</b>", table_cell),
-            Paragraph("Sayısal sipariş metriklerinden kalibre olasılık üretemez; sayı uydurur.", table_cell),
-            Paragraph("<b>TabPFN.</b> Küçük tablo verisinde 18 ms'de kesin risk yüzdesi verir.", table_cell)
+            Paragraph("<b>Kilitlenme</b>", table_cell),
+            Paragraph("Fiyat ve model sağlayıcının elinde.", table_cell),
+            Paragraph("<b>Model değiştirilebilir.</b> Satıcı masasından Gemma, Qwen, Llama seçilir.", table_cell)
         ]
     ]
     why_table = Table(why_data, colWidths=[110, 200, 205])
@@ -263,9 +262,9 @@ def build_pdf():
     # 4. Bilimsel Değerlendirme & Metrikler (Held-Out Gold)
     story.append(Paragraph("4. Deneysel Değerlendirme & Dürüst Akademik Metrikler", h1_style))
     story.append(Paragraph(
-        "Fırat Üniversitesi jürimizin akademik titizliğine uygun olarak; model eğitiminde asla kullanılmamış, "
-        "gerçek müşteri şikayetleri ve çoklu niyet (multi-intent) sınır vakalarını içeren <b>20 vakalık Held-Out Gold Set</b> üzerinde test edilmiştir. "
-        "Yapay %100 ezber skorları yerine gerçekçi ve savunulabilir sonuçlar elde edilmiştir.",
+        "Tüm sayılar <b>python scripts/evaluate_honest_metrics.py</b> ile bu repoda yeniden üretilir (docs/metrics.md). "
+        "Sınıflandırma, eğitimde kullanılmamış <b>20 vakalık Held-Out Gold Set</b> üzerinde; kural getirme ise doğru cevabı tek bir "
+        "politika olan 21 günlük dil müşteri mesajında ölçülmüştür.",
         body_style
     ))
 
@@ -273,40 +272,40 @@ def build_pdf():
     metrics_data = [
         [Paragraph("Görev / Test Katmanı", table_header), Paragraph("Metrik", table_header), Paragraph("Elde Edilen Değer", table_header), Paragraph("Açıklama & Hata Analizi", table_header)],
         [
-            Paragraph("NLU Kategori Sınıflandırma", table_cell),
+            Paragraph("Kategori (sistem)", table_cell),
+            Paragraph("Doğruluk / Macro F1", table_cell),
+            Paragraph("<b>%95,0 / %93,8</b>", table_cell),
+            Paragraph("Kategori eşleşen kuraldan alınır. Anahtar kelime NLU'su tek başına %60,0 / %54,0'da kalır.", table_cell)
+        ],
+        [
+            Paragraph("Niyet (anahtar kelime NLU)", table_cell),
             Paragraph("Macro F1", table_cell),
-            Paragraph("<b>%73.2</b> (Prec: %87.1)", table_cell),
-            Paragraph("Kargo hasarı ile ayıplı ürün arasındaki sınır vakalarında esnafı koruyan doğru tarafta kaldı.", table_cell)
+            Paragraph("<b>%61,2</b>", table_cell),
+            Paragraph("İnce ayarlı BERTurk dosyaları repoda değil; en zayıf halka ve sıradaki iyileştirme.", table_cell)
         ],
         [
-            Paragraph("NLU Niyet Sınıflandırma", table_cell),
-            Paragraph("Macro F1", table_cell),
-            Paragraph("<b>%88.0</b> (Prec: %88.9)", table_cell),
-            Paragraph("Şikayet, bilgi talebi ve teşekkür tonlarını yüksek kesinlikle ayırdı.", table_cell)
+            Paragraph("Kural getirme (kural düzeyi)", table_cell),
+            Paragraph("Hit@1", table_cell),
+            Paragraph("<b>%95,2</b> (20/21)", table_cell),
+            Paragraph("Ablasyon: BM25 %81,0 · E5 %71,4 · RRF %81,0 · Cross-Encoder tek başına 17/21.", table_cell)
         ],
         [
-            Paragraph("2026 Hibrit RAG Getirme", table_cell),
-            Paragraph("Doc Hit@1", table_cell),
-            Paragraph("<b>%100.0</b>", table_cell),
-            Paragraph("BM25 + Dense E5 + RRF kombinasyonu ile en doğru politika 1. sırada getirildi.", table_cell)
+            Paragraph("Kural getirme (kategori düzeyi)", table_cell),
+            Paragraph("Hit@1 / Hit@3", table_cell),
+            Paragraph("<b>%100 / %100</b>", table_cell),
+            Paragraph("Doğru kategoriden herhangi bir kural isabet sayılır; kural düzeyinden daha kolay bir ölçüt.", table_cell)
         ],
         [
-            Paragraph("2026 Hibrit RAG Getirme", table_cell),
-            Paragraph("Doc Hit@3 / MRR@3", table_cell),
-            Paragraph("<b>%100.0 / 1.000</b>", table_cell),
-            Paragraph("Cross-Encoder doğrulaması sayesinde kural dışı adımlar elendi.", table_cell)
+            Paragraph("Yanıt dayanak denetimi", table_cell),
+            Paragraph("İlk denemede geçen", table_cell),
+            Paragraph("<b>8/8</b>", table_cell),
+            Paragraph("Gemma 3 4B, 8 örnek soru ve yorum. Kuralda olmayan sayı içeren yanıt reddedilir, şablona dönülür.", table_cell)
         ],
         [
-            Paragraph("TabPFN Risk Kalibrasyonu", table_cell),
-            Paragraph("Olasılık Aralığı", table_cell),
-            Paragraph("<b>[0.04 - 0.96]</b>", table_cell),
-            Paragraph("Skorlar yapay 0 veya 1 değil; gerçekçi risk faktörlerine göre dinamiktir.", table_cell)
-        ],
-        [
-            Paragraph("Uçtan Uca Çıkarım Gecikmesi", table_cell),
-            Paragraph("Ortalama Süre", table_cell),
-            Paragraph("<b>< 1.8 sn</b> (CPU)", table_cell),
-            Paragraph("GPU gerektirmez, 4 çekirdekli standart laptop işlemcisinde tam akış tamamlanır.", table_cell)
+            Paragraph("Uçtan uca yanıt", table_cell),
+            Paragraph("Ortalama süre", table_cell),
+            Paragraph("<b>~2 sn</b>", table_cell),
+            Paragraph("Analiz ~0,46 sn (CPU) + Gemma ~1,4 sn (GPU, 2,9 GB). İlk istekte model yüklemesi ~7 sn.", table_cell)
         ]
     ]
     metrics_table = Table(metrics_data, colWidths=[120, 80, 105, 210])
@@ -334,9 +333,9 @@ def build_pdf():
     story.append(Paragraph(
         "Tek bir sahte deri mont iadesi esnafa <b>5.800 TL</b> doğrudan zarar yazmaktadır. "
         "Hasarlı kargolarda zabıt tutanağı tutturulmadığı için kargo firmasının ödemediği tazminat esnafın cebinden çıkmaktadır. "
-        "EsnafDoktor ayda yalnızca 2 haksız iadeyi ve 3 kargo hasar dosyasını doğru yönettiğinde esnafa doğrudan "
-        "<b>10.000 TL - 15.000 TL nakit koruma</b> sağlamaktadır. "
-        "Esnaf bu sistem için tek seferlik 1.500 TL lisans veya aylık 250 TL bakım ücretini tereddütsüz ödeyeceğini doğrulamıştır.",
+        "EsnafDoktor rutin soruları saatler yerine yaklaşık 2 saniyede yanıtlayarak mağaza puanını korur; riskli iadeleri gerekçesiyle "
+        "satıcıya ileterek tek bir haksız iadenin yazacağı zararı önler. Mesaj başına API ücreti olmadığı için maliyet mesaj sayısıyla artmaz. "
+        "Önerilen fiyatlandırma: tek seferlik 1.500 TL kurulum veya aylık 250 TL bakım.",
         body_style
     ))
     story.append(Spacer(1, 8))

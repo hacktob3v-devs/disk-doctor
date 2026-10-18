@@ -1,51 +1,55 @@
-# EsnafDoktor — Dürüst Akademik Metrikler ve Ablasyon Raporu
+# EsnafDoktor — Ölçülmüş Metrikler
 
-**Tarih:** 18 Ekim 2026  
-**Etkinlik:** Hacktoberfest Elazığ 2026 (FÜBEV / MLH / DEV)  
-**Donanım:** Standart Laptop CPU (Intel Core i5, 16 GB RAM) — Harici GPU veya Bulut API kullanılmamıştır.  
-**Sızıntı Denetimi:** Held-Out Gold Benchmark (20 vaka, çoklu niyet ve zorlu sınır durumları) eğitim setinden tamamen izole edilmiştir.
+**Tarih:** 18.10.2026
+**Üreten:** `python scripts/evaluate_honest_metrics.py` — bu dosyadaki tüm sayılar bu betik tarafından ölçülür, elle yazılmış değer yoktur.
+**Ortam:** Analiz hattı (NLU, RAG, risk) CPU üzerinde. Yanıt modeli (Gemma 3 4B, Ollama) bu betikte ölçülmez; README'deki yanıt süreleri ayrı ölçülmüştür.
+**Bu çalıştırmada:** NLU = `Calibrated-Turkish-NLU (Zero-Latency Rule-Enhanced)`, Cross-Encoder = açık, risk = `calibrated_rf_fallback`.
 
 ---
 
-## 1. NLU Sınıflandırma Başarımı (BERTurk & Calibrated Model)
+## 1. Sınıflandırma — 20 vakalık ayrılmış test seti (`data/holdout_gold.jsonl`)
 
-| Görev | Macro F1 | Macro Precision | Macro Recall | Ortalama Süre (CPU) |
+| Görev | Doğruluk | Macro Precision | Macro Recall | Macro F1 |
 | :--- | :---: | :---: | :---: | :---: |
-| **Kategori Sınıflandırma** (5 Sınıf) | **%73.2** | %87.1 | %73.3 | 1173.71 ms |
-| **Niyet / Duygu Sınıflandırma** (3 Sınıf) | **%88.0** | %88.9 | %87.4 | — |
+| **Kategori — sistem** (eşleşen kuralın kategorisi) | **%95.0** | %96.0 | %93.3 | **%93.8** |
+| Kategori — sadece anahtar kelime NLU | %60.0 | %51.4 | %60.3 | %54.0 |
+| Niyet — anahtar kelime NLU | %60.0 | %82.2 | %62.1 | %61.2 |
 
-> **Jüri Notu (Gerçekçi Hata Analizi):** Skorların yapay olarak %100 çıkmaması projenin en büyük bilimsel güvencesidir. Örneğin "Kutusu sağlamdı ama içindeki seramik kupanın kulpu kırık" ifadesi hem kargo hem ürün sınırında yer almakta; modelimiz bunu öncelikli olarak kusurlu ürün kategorisine yönlendirerek esnafın haklı tazminat sürecini korumuştur.
-
----
-
-## 2. 2026 Advanced RAG Arama ve Getirme Ablasyonu
-
-| Getirme Yöntemi | Doc Hit@1 | Doc Hit@3 | MRR@3 | Bilimsel Gerekçe |
-| :--- | :---: | :---: | :---: | :--- |
-| **BM25 Tek Başına (Lexical)** | %70.0 | %80.0 | 0.745 | Türkçe morfolojik çekim eklerinde kök eşleşmesi kaçabiliyor. |
-| **Dense E5 Tek Başına (Semantic)** | %75.0 | %85.0 | 0.800 | Genel anlamsal bağlam güçlü ancak 9 haneli kargo kodu gibi terimleri kaçırabiliyor. |
-| **Hibrit (BM25 + Dense + RRF k=60)** | %85.0 | %95.0 | 0.885 | İki dünyanın avantajını birleştiriyor; rank kaybını önlüyor. |
-| **Hibrit + Cross-Encoder Reranker (Bizim)** | **%100.0** | **%100.0** | **1.000** | **En yüksek doğruluk: Getirilen adayın mağaza politikası ile anlamsal tam örtüşmesi.** |
+> İnce ayarlı BERTurk modelleri bu repoda yer almadığı için NLU anahtar kelime yedeğiyle çalışır. Arayüzde gösterilen kategori, kural düzeyinde daha isabetli olan RAG eşleşmesinden alınır.
 
 ---
 
-## 3. Donanım ve Çıkarım Gecikmesi (Offline Performance Budget)
+## 2. Kural getirme ablasyonu
 
-* **NLU Çıkarım Süresi:** `1173.71 ms`
-* **Hibrit RAG & Rerank Süresi:** `947.53 ms`
-* **TabPFN Tabular Risk Analiz Süresi:** `109.34 ms`
-* **Uçtan Uca Toplam Süre:** **`2230.58 ms` (< 0.05 saniye!)**
-* **Değişken API Maliyeti:** **`0.00 TL`** (İnternet kablosu çekildiğinde dahi kesintisiz çalışır)
+Kural düzeyi: 21 günlük dil müşteri mesajı, doğru cevap tek bir politika (`scripts/evaluate_rag_policy.py`).
+Kategori düzeyi: 20 vakalık test seti; doğru kategoriden herhangi bir politika isabet sayılır.
+
+| Getirme yöntemi | Kural Hit@1 | Kural Hit@3 | Kural MRR@3 | Kategori Hit@1 | Kategori Hit@3 |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| BM25 tek başına (Türkçe normalize) | %81.0 | %95.2 | 0.865 | %75.0 | %90.0 |
+| multilingual-e5-small tek başına | %71.4 | %85.7 | 0.786 | %95.0 | %100.0 |
+| Hibrit: BM25 + E5 + RRF (k=60) | %81.0 | %95.2 | 0.873 | %90.0 | %90.0 |
+| **Hibrit + anahtar kelime + Cross-Encoder ağırlığı (sistem)** | **%95.2** | %100.0 | 0.976 | %100.0 | %100.0 |
 
 ---
 
-## 4. Karışıklık Matrisi (Kategori)
+## 3. Süre (ısınmış, medyan, CPU)
 
-Sınıflar: `['genel', 'iade', 'kargo', 'teknik', 'urun']`
+* **NLU:** `0.06 ms`
+* **Kural getirme (BM25 + E5 + Cross-Encoder):** `439 ms`
+* **Risk skoru:** `0.04 ms` (`calibrated_rf_fallback`)
+* **Analizin tamamı (arayüzdeki `/api/analyze`):** `423 ms`
+* **Değişken API maliyeti:** `0.00 TL` — tüm modeller yerelde çalışır
+
+---
+
+## 4. Karışıklık matrisi — sistem kategorisi
+
+Satır: doğru, sütun: tahmin. Sınıflar: `['genel', 'iade', 'kargo', 'teknik', 'urun']`
 ```
 [[2 0 1 0 0]
  [0 5 0 0 0]
  [0 0 4 0 0]
- [0 1 0 3 0]
- [0 3 0 0 1]]
+ [0 0 0 4 0]
+ [0 0 0 0 4]]
 ```

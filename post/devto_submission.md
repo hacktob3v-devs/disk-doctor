@@ -1,142 +1,110 @@
 ---
-title: "The Bazaar Merchant Who Stopped Losing Money to Fraudulent Returns: 100% Offline with Gemma, BERTurk & TabPFN"
-published: true
+title: "Your Question to a Small Online Seller Shouldn't Wait Hours: Instant, Rule-Grounded Answers with a Local Gemma"
+published: false
 tags: devchallenge, hf26challenge, opensource, ai, python
-cover_image: https://raw.githubusercontent.com/esnafdoktor/assets/main/cover.png
+cover_image: 
 canonical_url: 
 ---
 
-## 1. The Scene: 19:30 in the Historic Bazaar
+## 1. The Problem: "Where Is My Parcel?" … Six Hours Later
 
-In the stone-arched alleyways of **Elazığ Kapalı Çarşı**, Mehmet Usta stands behind a counter buried under cardboard boxes, packaging tape, and leather boots. 
+You order a leather bag from a small shop on Trendyol. Two days pass, nothing moves, so you write to the seller: *"Kargom nerede?"* The answer comes in the evening — if it comes at all.
 
-His phone buzzes relentlessly. It's not phone calls—it's notifications from **Trendyol, Hepsiburada, and WhatsApp**. 
+On the other side is one person who packs every order, answers Trendyol, Hepsiburada and Instagram messages, and handles returns. Most questions are routine ("can I swap the size?", "I was charged twice", "when will my refund arrive?"), but they pile up. Slow answers lower the store score. Rushed answers are worse: approve every refund and you pay for worn shoes with cut-off tags; quote a rule that isn't the store's rule and you start a dispute.
 
-Between 18:00 and 22:00 every single evening, when Mehmet should be packing his daily orders, he gets hit with **150+ customer disputes**:
-> *"My parcel has been sitting at the regional transfer hub for 4 days! You took my money and scammed me, I am filing a fraud complaint with the Consumer Arbitration Court!"*
-
-Mehmet is trapped in an impossible dilemma:
-* If he doesn't reply within 15 minutes, the marketplace algorithm drops his store response rating, burying his listings.
-* If he automatically accepts every dispute, unscrupulous buyers return worn shoes with torn hygiene tags, wiping out his entire day’s profit margin.
-* If he tries to buy an enterprise customer service AI (like Salesforce or Zendesk AI), the **$0.05 per API call** and thousands of dollars in monthly subscriptions would bankrupt his small business.
-* And inside the historic stone vaults of the bazaar, cellular coverage frequently drops to 2G or cuts out completely.
-
-**EsnafDoktor was born for Mehmet Usta.** 
-
-It is an open-source, 100% offline AI copilot that runs on a modest refurbished shop laptop, triages Turkish customer complaints, queries store policies using **2026 Advanced Hybrid RAG**, and calculates return abuse risk in **18 milliseconds using TabPFN**—all at **0.00 TL API cost**.
+**EsnafDoktor answers the routine questions in about two seconds and hands the risky ones to the seller** — using an open-weight model that runs on the seller's own computer, at 0 TL per message.
 
 ---
 
-## 2. The Core Question: Why Open-Source Beats Closed Cloud APIs
+## 2. Why Open Weights and Local Inference
 
-During hackathon presentations, judges often ask: *"Why didn't you just wrap GPT-4o in an API call?"*
-
-Here is our empirical answer from Mehmet Usta's workbench:
-
-| Criterion (Hackathon Slide 18) | Closed API Reality (OpenAI / Claude) | EsnafDoktor (Open-Weight & Local) |
+| | Closed API (per-message pricing) | EsnafDoktor (open weights, local) |
 | :--- | :--- | :--- |
-| **Variable Cost** | $0.03 – $0.08 per ticket. For 200 tickets/day, costs ~15,000 TL ($450) every month. | **0.00 TL per scan.** Runs indefinitely without subscription shock. |
-| **Internet Dependency** | Fails completely when bazaar Wi-Fi drops or cell tower is congested. | **100% Offline.** Demonstrable live with laptop Wi-Fi toggled off. |
-| **Data Privacy (KVKK)** | Customer delivery address, phone, and order total shipped to overseas servers. | **Zero Data Leakage.** All records remain strictly on the local SSD. |
-| **Tabular Understanding** | Generic LLMs cannot calculate calibrated probabilities from tabular arrays. | **TabPFN** foundation model specializes in tabular arrays, computing risk in 18ms. |
+| **Cost** | grows with every message | **0 TL per message** on the laptop the shop already has |
+| **Customer data (KVKK)** | names, addresses and orders leave the country | **stays on the seller's disk** |
+| **Internet** | no connection, no answers | inference is local; works with Wi-Fi off once models are downloaded |
+| **Lock-in** | provider sets price and model | **swap the model** from the seller desk (Gemma, Qwen, Llama…) |
 
 ---
 
-## 3. What We Built: The 4 Pillars of EsnafDoktor
+## 3. What We Built
+
+Every customer message goes through four steps:
 
 ```mermaid
 graph TD
-    A["Customer Message (TR)"] --> B["core/nlu_berturk.py<br/>(Fine-Tuned BERTurk)"]
-    A --> C["core/rag_engine.py<br/>(2026 Advanced RAG)"]
-    
-    subgraph "Hybrid Retrieval Layer"
-        C --> D["Turkish BM25 Okapi"]
-        C --> E["Multilingual-E5 Dense Vectors"]
-        D & E --> F["Reciprocal Rank Fusion (RRF k=60)"]
-    end
-    
-    F --> G["Cross-Encoder Semantic Re-Ranker"]
-    G --> H["Self-RAG Grounding & Policy Guard"]
-    
-    I["Order Telemetry (Amount, Delay, Past Returns)"] --> J["core/tabpfn_dispute.py<br/>(TabPFN Tabular Model)"]
-    B & J --> K["Calibrated Risk & Driver Factors"]
-    
-    B & H & K --> L["core/llm_gemma.py<br/>(Local Gemma Resolution Engine)"]
-    L --> M["app.py (Streamlit Dark UI)"]
-    M --> N["Printable A4 Customer/Merchant Certificate (HTML)"]
+    A["Customer message (TR)"] --> B["NLU: intent"]
+    A --> C["Hybrid policy retrieval<br/>BM25 + multilingual-e5 + RRF"]
+    C --> G["re-rank: keywords + Cross-Encoder nudge"]
+    O["Order data"] --> J["return-abuse risk"]
+    B & G & J --> K["auto-answer or hand off"]
+    K --> L["Gemma 3 4B (Ollama, local)<br/>reply from the policy only"]
+    L --> V["grounding guard"]
+    V --> W["customer page + seller desk"]
 ```
 
-### 1. Fine-Tuned Turkish NLU (BERTurk)
-We utilize a dual-head fine-tuned BERTurk model (442MB local weights) that classifies incoming messages into:
-* **Category:** `kargo` (shipping), `iade` (return), `urun` (product defect), `teknik` (technical/payment), `genel` (general info).
-* **Intent & Sentiment:** `sikayet` (complaint), `bilgi_talebi` (inquiry), `tesekkur` (gratitude).
+**1. Find the store's rule.** Sixteen Turkish e-commerce policies (shipping delays, damaged parcels, 14-day withdrawal, used-item refusals, double charges…). Retrieval fuses Turkish-normalised BM25 with `multilingual-e5-small` via Reciprocal Rank Fusion, then re-ranks with the policy keywords and a multilingual Cross-Encoder used as a *weight*, not a judge.
 
-### 2. 2026 Advanced Agentic RAG
-Most RAG projects rely on naive 2024 single-vector retrieval. EsnafDoktor implements a state-of-the-art multi-stage hybrid engine:
-1. **Lexical Retrieval:** Turkish Okapi BM25 with token-level stemming.
-2. **Dense Retrieval:** Local `multilingual-e5-small` embeddings.
-3. **Rank Fusion:** Reciprocal Rank Fusion (RRF with $k=60$) combining keyword and semantic scores.
-4. **Re-Ranking:** Local Cross-Encoder calibration scoring candidate policy relevance.
-5. **Self-RAG Grounding Guard:** Verifies policy token support before generating output, preventing hallucinated store promises.
+**2. Score the risk.** Order amount, delivery days, return history, unboxing video and damage report feed a risk model. TabPFN is integrated; recent TabPFN versions need a one-time PriorLabs license acceptance to download weights, so until then a calibrated logistic formula on the same five features runs, and the health endpoint says so.
 
-### 3. Tabular Dispute Risk Prediction (TabPFN)
-Instead of asking an LLM to guess whether an order is fraudulent, we feed order telemetry (order value, shipping days, past return ratio, unboxing video availability, and packaging condition) into **TabPFN**. In **< 20 milliseconds on CPU**, TabPFN outputs a calibrated dispute risk score with explainable drivers (e.g., *"Past return rate is 66%", "Delivery exceeded 5 days"*).
+**3. Decide who answers.** Routine questions are answered immediately. Angry messages, high-risk orders and used-item refunds get a short "I've forwarded this to the shop owner" reply and land in the seller's inbox. For damage and defect claims the assistant asks for photos and also forwards the case. **The model never approves or refuses a refund.**
 
-### 4. Local Gemma Action Cards
-Local **Gemma** synthesizes the NLU tags, policy evidence, and TabPFN risk score into an **Action Card**:
-* A clear decision for the merchant: *[Open Cargo Damage Claim]*, *[Authorize Unconditional Return]*, or *[Request Packaging Photo]*.
-* An empathetic, professional Turkish message ready to copy-paste into WhatsApp or Trendyol.
+**4. Write the reply — and check it.** Gemma 3 4B writes at most three sentences, using only the matched policy. Then a simple guard runs: every number in the reply (days, amounts, codes) must appear in the policy or the customer's message. If not, the reply is regenerated once with a stricter instruction; if it still fails, the rule-based template is sent. During development this guard caught a model promising *"your return window is 7 days"* — a number that exists nowhere in the store's rules.
+
+**The interface** is plain HTML/CSS/JS served by FastAPI:
+- **Customer page** — product page with a "Satıcıya sor" chat and a review form. Each message shows (for the jury) its classification, the policy it was based on, and whether it was handed off.
+- **Seller desk** — inbox of auto-answered and escalated messages, order ledger, risk stamp with drivers, action checklist, policy citation and an editable draft written by the local model. Keyboard driven (J/K, E). An optional voice summary reads the decision aloud, skipping policy codes and order numbers.
 
 ---
 
-## 4. Honest Academic Metrics: No 100% Illusions
+## 4. Measured Results (and What Isn't There Yet)
 
-As computer science researchers from Fırat University taught us: **any machine learning project claiming 100% accuracy on real consumer data is leaking test data or overfitting synthetic templates.**
+Every number below is produced by a script in the repo (`scripts/evaluate_honest_metrics.py`, `scripts/evaluate_rag_policy.py`).
 
-We evaluated EsnafDoktor on a held-out benchmark of **20 challenging real-world queries** containing hard category boundaries, multi-intent statements, and keyboard typos:
+| What | Result |
+| :--- | :---: |
+| Category accuracy, 20-case held-out set | **95.0 %** (macro F1 93.8 %) |
+| Exact policy Hit@1, 21 colloquial messages | **95.2 %** |
+| — BM25 alone / E5 alone / RRF | 81.0 % / 71.4 % / 81.0 % |
+| — Cross-Encoder as the only re-ranker | 17/21 |
+| Replies passing the grounding guard (Gemma 3 4B) | 8/8 on first try |
+| Analysis time (warm, CPU) | ~0.46 s |
+| Reply time (warm, Gemma 3 4B on GPU, 2.9 GB VRAM) | ~1.4 s |
 
-| Task / Component | Metric | Score | Hardware / Note |
-| :--- | :---: | :---: | :--- |
-| **NLU Category Classification** | Macro F1 | **73.2%** | Local CPU (< 0.04s) |
-| **NLU Intent Classification** | Macro F1 | **88.0%** | Local CPU (< 0.04s) |
-| **RAG Policy Retrieval Hit@1** | Top-1 Accuracy | **100.0%** | BM25 + Dense E5 + Cross-Encoder |
-| **RAG Policy Retrieval Hit@3** | Top-3 Accuracy | **100.0%** | BM25 + Dense E5 + Cross-Encoder |
-| **TabPFN Latency** | Execution Time | **< 20 ms** | CPU |
-| **Total Pipeline Latency** | End-to-End Time | **< 1.8 s** | CPU (Intel Core i5) |
+The Cross-Encoder result surprised us: on short Turkish policies its scores are almost flat, and letting it decide alone made retrieval *worse*. Used as a small weight on top of keyword and semantic scores, it fixes the last few cases.
 
-### Realistic Error Analysis
-In our evaluation, the query *"The box was fine, but the ceramic cup inside had its handle broken"* was classified as `urun` (product defect) rather than `kargo`. In standard benchmarks, this counts as a technical discrepancy; in the real world, this is a **valuable protective feature** because cargo carriers reject damage claims if the outer box was delivered without a carrier damage report (*zabıt tutanağı*), so treating it under the manufacturer's defect warranty protects the merchant's claim!
-
----
-
-## 5. Our First User: Mehmet Usta's Verdict
-
-At 21:00, we visited Mehmet Usta's shop in Elazığ with a demonstration laptop:
-1. We pulled the Wi-Fi plug from the wall.
-2. We fed an actual furious customer message from his Trendyol notification panel: *"The dress has arrived with the zipper split, I want my money back right now!"*
-3. Within **1.2 seconds**, EsnafDoktor classified the dispute as `urun` / `sikayet`, queried the 14-day defect policy, calculated a low abuse risk (0.18 Green), and drafted an apology reply offering an immediate replacement code.
-4. Mehmet Usta read the drafted response, smiled, and said:
-   > *"If this tool saves me from having to argue with 50 customers every night while trying to pack boxes, I would gladly pay 1,500 TL upfront just to have it sitting on this laptop."*
+**Not there yet, said plainly:**
+- Our fine-tuned BERTurk classifiers are not in the repo, so the NLU runs a keyword fallback (60 % category accuracy alone). That's why the interface takes the category from the matched policy.
+- TabPFN needs the license step described above.
+- Browser speech-to-text in Chrome/Edge sends audio to the vendor; reading replies aloud is local.
 
 ---
 
-## 6. How We Built It & Open-Source Categories
+## 5. What the Demo Shows
 
-* **Best Use of Gemma ($200 - Google DeepMind):** Gemma 4 / Gemma 3:1b via local Ollama HTTP loopback generates strictly bounded, structured action cards.
-* **Best Use of TabPFN ($200 - Prior Labs):** TabPFN tabular architecture evaluates multi-sensor order features in <20ms on CPU.
-* **Best Open-Source AI Project ($200 - DigitalOcean / MLH):** 100% open-source under the MIT license, with zero external API calls.
-* **Best Use of GitHub Copilot:** Entire test suite, typing contracts, and Streamlit dark UI developed using Copilot pair-programming.
+1. The customer asks *"Kargom 5 gündür gelmedi, nerede?"* — in about two seconds Gemma answers from the shipping-delay policy (standard delivery 1–3 business days, a tracking complaint after 4), and the chips show *Kargo · Şikâyet · POL_KARGO_01*.
+2. The customer writes *"Rezalet! Çantayı bir kere kullandım, etiketini de kestim, paramı hemen verin"*. The assistant does **not** promise a refund: it replies that the message was forwarded, and a *"Mağaza sahibine iletildi · Acil"* note appears.
+3. In the seller desk that message is at the top of the inbox with its risk stamp, the matched used-item policy, a checklist and a draft reply the seller can regenerate with the local model and approve.
 
-### Reproduction & Code
-* **GitHub Repository:** [github.com/esnafdoktor/esnaf-doktor](https://github.com/esnafdoktor/esnaf-doktor)
+---
+
+## 6. Open Source
+
+* **Best Use of Gemma:** Gemma 3 4B runs locally through Ollama and writes every customer reply, bounded by the store's policy and checked by the grounding guard.
+* **Best Open-Source AI Project:** MIT licensed, open-weight models only, no external API calls for inference.
+* **Best Use of TabPFN:** integrated for return-abuse risk; enabled with `ED_USE_TABPFN=1` after the license step.
+
+### Reproduction
+* **Repository:** [github.com/hacktob3v-devs/disk-doctor (branch `esnaf-doktor`)](https://github.com/hacktob3v-devs/disk-doctor/tree/esnaf-doktor)
 * **License:** MIT
-* **Quickstart:**
+
 ```bash
-git clone https://github.com/esnafdoktor/esnaf-doktor.git
+git clone -b esnaf-doktor https://github.com/hacktob3v-devs/disk-doctor.git esnaf-doktor
 cd esnaf-doktor
 pip install -r requirements.txt
-pytest tests/ -v          # All 7 tests pass offline!
-streamlit run app.py      # Launch offline UI
+ollama pull gemma3:4b
+pytest tests/ -v
+python server.py          # http://127.0.0.1:8000  and  /satici.html
 ```
 
-Open weights, open data, and zero per-customer cost. AI belongs to everyone—including the small bazaar merchant.
+Open weights, store-specific rules and zero per-message cost — so the small seller can answer as fast as the big ones.

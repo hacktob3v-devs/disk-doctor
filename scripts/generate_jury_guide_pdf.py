@@ -71,7 +71,7 @@ class NumberedCanvas(canvas.Canvas):
 
         # Footer rule
         self.line(MARGIN, 28, WIDTH - MARGIN, 28)
-        self.drawString(MARGIN, 18, "Gizli / Yarışmacı Hazırlık Dokümanı · %100 Açık Ağırlıklı Mimari (Gemma 4 + TabPFN)")
+        self.drawString(MARGIN, 18, "Yarışmacı Hazırlık Dokümanı · Açık Ağırlıklı Yerel Mimari (Gemma 3 4B + Hibrit RAG)")
         self.drawRightString(WIDTH - MARGIN, 18, f"Sayfa {self._pageNumber} / {page_count}")
         self.restoreState()
 
@@ -114,12 +114,12 @@ def make_question_card(
     )
     
     intent_p = Paragraph(
-        f"<b>🎯 Jüri Neyi Ölçüyor?</b> {what_judge_measures}",
+        f"<b> Jüri Neyi Ölçüyor?</b> {what_judge_measures}",
         ParagraphStyle("CardIntent", fontName=fn, fontSize=8.5, leading=12, textColor=NAVY)
     )
     
     ans_p = Paragraph(
-        f"<b>💡 100/100 Tam Puanlık Cevap:</b><br/>{full_score_answer}",
+        f"<b> 100/100 Tam Puanlık Cevap:</b><br/>{full_score_answer}",
         ParagraphStyle("CardAns", fontName=fn, fontSize=9, leading=13, textColor=PRIMARY)
     )
     
@@ -202,7 +202,7 @@ def build_pdf():
     story = []
 
     # 1. Header Banner
-    story.append(Paragraph("🏆 EsnafDoktor — Fırat Üniversitesi Jüri Savunma Rehberi", title_style))
+    story.append(Paragraph("EsnafDoktor — Fırat Üniversitesi Jüri Savunma Rehberi", title_style))
     story.append(Paragraph("HACKTOBERFEST ELAZIĞ 2026 · WEEK 2 \"SIDE HUSTLE\" · 100/100 TAM PUANLIK SAVUNMA REHBERİ", subtitle_style))
     story.append(HRFlowable(width="100%", thickness=1.5, color=NAVY, spaceAfter=8, spaceBefore=0))
 
@@ -219,8 +219,8 @@ def build_pdf():
                       "• <b>Yazı / Rapor Kalitesi:</b> En ağır kriter (Akademik PDF)<br/>"
                       "• <b>Temaya Uygunluk:</b> KOBİ/E-Ticaret Side Hustle<br/>"
                       "• <b>Teknik Uygulama:</b> 4 Katmanlı Hibrit Mimari<br/>"
-                      "• <b>Partner Teknolojisi:</b> Gemma 4 + TabPFN ($400 Hedef)<br/>"
-                      "• <b>Yaratıcılık:</b> İki Yönlü Sesli Asistan (STT/TTS)", body_style)
+                      "• <b>Partner Teknolojisi:</b> Gemma 3 4B (+ TabPFN entegrasyonu)<br/>"
+                      "• <b>Yaratıcılık:</b> Müşteri sohbeti + satıcı masası, sesli okuma", body_style)
         ]
     ]
     info_table = Table(info_data, colWidths=[(WIDTH - (MARGIN * 2)) * 0.52, (WIDTH - (MARGIN * 2)) * 0.48])
@@ -235,22 +235,22 @@ def build_pdf():
     story.append(info_table)
     story.append(Spacer(1, 10))
 
-    story.append(Paragraph("🎯 EN KRİTİK 7 JÜRİ SORUSU VE 100/100 TAM PUANLIK CEVAPLAR", section_h1))
+    story.append(Paragraph("EN KRİTİK 7 JÜRİ SORUSU VE 100/100 TAM PUANLIK CEVAPLAR", section_h1))
 
     # Question 1: Architecture Division of Labor
     story.append(make_question_card(
         q_num=1,
         judge_name="Arş. Gör. Mehmet Arzu",
         criterion="Teknik Uygulama (%25)",
-        question_text="Sistemde BERTürk, RAG, TabPFN ve Gemma 4 var. Neden tek bir LLM ile çözmediniz?",
+        question_text="Sistemde NLU, RAG, risk modeli ve Gemma var. Neden tek bir LLM ile çözmediniz?",
         what_judge_measures="Adayın mikro-model prensibini bilip bilmediği, LLM'i her işe körü körüne alet edip etmediği.",
-        full_score_answer="Tek bir LLM her işe yetmez ve gecikmeyi artırır. Biz görevleri uzmanlarına dağıttık: "
-                          "<b>1) BERTürk</b> 15 ms'de intent ve kategori çıkarır. "
-                          "<b>2) 2026 Hibrit RAG (BM25+E5+RRF)</b> mağazanın 16 hukuki kuralını getirir. "
-                          "<b>3) TabPFN</b> sayısal sipariş parametrelerinden 18 ms'de risk dağılımı hesaplar. "
-                          "<b>4) Gemma 4</b> ise tüm bu kanıtları birleştirip aksiyon kartı ve WhatsApp yanıtı üreten Akıl Yürütme Motorudur. "
-                          "Böylece sistem CPU üzerinde &lt;1.8 saniyede ve 0 TL değişken maliyetle çalışır.",
-        golden_punchline="LLM metin akıl yürütmesi için merkezdedir; ancak deterministik kuralları RAG, tabüler riski TabPFN çözer.",
+        full_score_answer="Tek bir LLM her işe yetmez; kural uydurur ve sayısal riski tahmin edemez. Görevleri uzmanlarına dağıttık: "
+                          "<b>1) NLU</b> niyeti (şikâyet / soru / teşekkür) çıkarır. "
+                          "<b>2) Hibrit RAG (BM25 + E5 + RRF + Cross-Encoder ağırlığı)</b> 16 mağaza kuralından doğrusunu %95,2 isabetle bulur. "
+                          "<b>3) Risk modeli</b> 5 sipariş verisinden iade suistimali riskini hesaplar. "
+                          "<b>4) Gemma 3 4B</b> yalnızca bulunan kurala dayanarak müşteriye yanıt yazar; yanıtı bir dayanak denetiminden geçer. "
+                          "Analiz ~0,46 sn, Gemma yanıtı ~1,4 sn: toplam ~2 saniye, 0 TL değişken maliyet.",
+        golden_punchline="Gemma yazar, ama neyi yazacağına kural karar verir; riskli kararı ise satıcı verir.",
         fn=fn, fn_bold=fn_bold
     ))
     story.append(Spacer(1, 8))
@@ -260,15 +260,14 @@ def build_pdf():
         q_num=2,
         judge_name="Arş. Gör. Diyar Güzelses",
         criterion="Veri Bilimi ve Doğrulama (%20)",
-        question_text="Veri setiniz sentetik mi, gerçek mi? Neden F1 skorunuz %100 değil?",
+        question_text="Veri setiniz sentetik mi, gerçek mi? Skorlarınıza neden güvenelim?",
         what_judge_measures="Veri sızıntısı (leakage) olup olmadığı ve adayın dürüst akademik olgunluğu.",
-        full_score_answer="Hocam, yapay %100 skor sentetik ezber ve veri sızıntısı işaretidir. Biz 3 katmanlı dürüst veri kurduk: "
-                          "BERTürk modelimiz 18.000+ gerçek Türkçe şikayet verisiyle eğitilmiştir. "
-                          "Sentetik motorumuzda şablon kopyalamayı çöpe attık; 8 farklı tüketici davranışı ve mobil klavye yazım hataları (typo) "
-                          "içeren 3.000 satırlık veri ürettik. "
-                          "Modeli ise daha önce hiç görmediği 20 zorlu sınır vakası (Held-Out Gold) üzerinde test ettik. "
-                          "Aldığımız %73.2 kategori ve %88.0 niyet F1 skorları, gerçek dünya gürültüsüne karşı alınmış sızıntısız skorlardır.",
-        golden_punchline="Yarışmada %100 skor getiren sistem ezber yapmıştır; bizim %73-%88 aralığımız sızıntısız validasyonun kanıtıdır.",
+        full_score_answer="Her sayımız repodaki bir betikle yeniden üretilebilir; elle yazılmış metrik yok. "
+                          "Sistemi daha önce hiç görmediği 20 zorlu sınır vakasında (Held-Out Gold) test ettik: kategori doğruluğu <b>%95,0</b> (macro F1 %93,8). "
+                          "Kural düzeyinde 21 günlük dil mesajında doğru kuralı <b>%95,2</b> isabetle buluyoruz; ablasyonda BM25 %81, E5 %71, RRF %81'de kalıyor. "
+                          "Zayıf yanımızı da saklamıyoruz: ince ayarlı BERTurk dosyaları repoda değil, çalışan anahtar kelime NLU'su tek başına %60. "
+                          "Bu yüzden arayüzde kategoriyi daha isabetli kural eşleşmesinden alıyoruz.",
+        golden_punchline="Ölçemediğimiz hiçbir şeyi iddia etmiyoruz: python scripts/evaluate_honest_metrics.py çalıştırın, aynı sayıları görün.",
         fn=fn, fn_bold=fn_bold
     ))
     story.append(Spacer(1, 8))
@@ -287,7 +286,9 @@ def build_pdf():
                           "<b>3) Müşteri geçmiş iade oranı</b> (%0 mı, %80 suistimalci mi?), "
                           "<b>4) Açılış videosu</b> ve <b>5) Kargo hasar tutanağı</b> varlığı. "
                           "LLM bu tablodan güvenilir olasılık çıkaramaz, sayı uydurur. "
-                          "TabPFN CPU'da 18 ms'de riski hesaplar; risk yüksekse Gemma sahte iadeyi onaylamaz, inceleme adımlarını devreye sokar.",
+                          "Dürüst durum: güncel TabPFN ağırlıkları PriorLabs lisans onayı istiyor; onaydan sonra ED_USE_TABPFN=1 ile açılıyor. "
+                          "O zamana kadar aynı 5 özellikten kalibre bir lojistik formül çalışıyor ve /api/health bunu açıkça gösteriyor. "
+                          "Risk yüksekse asistan müşteriye iade sözü vermez; mesaj satıcıya Acil olarak düşer.",
         golden_punchline="TabPFN metin botunu işletme koruyucusuna dönüştürür; esnafı sahte iade dolandırıcılığından kurtaran parça budur.",
         fn=fn, fn_bold=fn_bold
     ))
@@ -301,13 +302,13 @@ def build_pdf():
         criterion="Yazılım Mimarisi & Güvenlik (%20)",
         question_text="Wi-Fi'ı kopardığımızda bu sistem gerçekten çalışır mı? Dışarıya gizli API çağrısı var mı?",
         what_judge_measures="Sistemin gerçekten yerel (open-weight) çalışıp çalışmadığı ve KVKK/Gizlilik uyumu.",
-        full_score_answer="Kesinlikle evet. Şu anda laptopun Wi-Fi bağlantısını jüri önünde tamamen kapatabiliriz. "
-                          "BERTürk, TabPFN, E5 embedding ve Gemma 4 yerel donanımda çalışır. "
-                          "Dışarıya tek bir HTTP/API çağrısı gitmez. "
+        full_score_answer="Evet, modeller bir kez indirildikten sonra. Wi-Fi'ı jüri önünde kapatabiliriz. "
+                          "Gemma 3 4B (Ollama), E5, Cross-Encoder, NLU ve risk modeli yerel donanımda çalışır; hiçbir bulut API çağrısı yoktur. "
+                          "Açıkça söylediğimiz tek istisna: tarayıcının sesle yazma özelliği sesi bulut servisine gönderir; yanıtları sesli okuma ise yereldir. "
                           "Bu sayede iki dev avantaj sağlanır: "
-                          "<b>1) 0.00 TL API Maliyeti:</b> Günde 200 mesaj alan küçük işletme ayda ~15.000 TL OpenAI token faturası ödeyemez. "
+                          "<b>1) 0.00 TL API Maliyeti:</b> Mesaj başına token faturası yok; maliyet mesaj sayısıyla artmaz. "
                           "<b>2) KVKK / Gizlilik:</b> Alıcının adresi, telefonu ve sepet tutarı yabancı bulutlara gitmez, cihazda kalır.",
-        golden_punchline="Dükkanda internet kesilse bile sistem kesintisiz karar verir; müşteri verisi asla bilgisayardan dışarı çıkmaz.",
+        golden_punchline="İnternet kesilse de sistem yanıt verir; müşteri verisi bilgisayardan dışarı çıkmaz.",
         fn=fn, fn_bold=fn_bold
     ))
     story.append(Spacer(1, 8))
@@ -319,12 +320,12 @@ def build_pdf():
         criterion="RAG Mimarisi & Güvenilirlik (%20)",
         question_text="Gemma politikada olmayan bir kural uydurursa esnaf batar. Halüsinasyonu nasıl önlediniz?",
         what_judge_measures="RAG boru hattının güvenliği ve Self-RAG / Grounding denetimi.",
-        full_score_answer="Geçen yılın düz kosinüs RAG'lerini terk ettik; <b>2026 İki Aşamalı Hibrit RAG</b> kurduk: "
-                          "BM25 anahtar kelime ile Multilingual-E5 vektör araması paralel çalışır, RRF (k=60) ile birleştirilir ve Cross-Encoder ile yeniden sıralanır. "
-                          "En önemlisi: <b>Self-RAG Grounding Guard</b> devrededir. Gemma'nın çıktısı sistemdeki 16 doğrulanmış mağaza politikasıyla "
-                          "birebir eşleştirilir. Dayanağı olmayan hiçbir kural (örn. 14 gün yerine 30 gün) üretilemez. "
-                          "Ayrıca nihai WhatsApp gönderim onayı her zaman satıcıdadır.",
-        golden_punchline="Sistem kural uyduramaz; her önerinin altında 'Dayanak Kural Kodu' zorunlu TypedDict kontratı olarak üretilir.",
+        full_score_answer="Üç katmanlı önlem aldık. <b>1) Doğru kuralı bulmak:</b> BM25 + E5 + RRF + Cross-Encoder ağırlığıyla kural düzeyinde %95,2 isabet. "
+                          "<b>2) Dayanak denetimi:</b> Gemma'nın yanıtındaki her sayı (gün, tutar, kod) kural metninde ya da müşterinin mesajında geçmek zorunda; "
+                          "geçmezse yanıt bir kez yeniden yazdırılır, yine geçmezse kurala dayalı şablon gönderilir. Geliştirmede bir modelin "
+                          "'iade süreniz 7 gün' uydurmasını bu denetim yakaladı. "
+                          "<b>3) Karar satıcıda:</b> iade reddi, kullanılmış ürün, öfkeli dil ve yüksek riskte müşteriye yalnızca 'mağaza sahibine ilettim' gider.",
+        golden_punchline="Model yazar, kural sınırlar, denetim doğrular, satıcı karar verir.",
         fn=fn, fn_bold=fn_bold
     ))
     story.append(Spacer(1, 8))
@@ -340,8 +341,9 @@ def build_pdf():
                           "Haksız kabul edilen tek bir sahte mont/telefon iadesi 5.800 TL doğrudan zarar yazar. "
                           "Kargo hasarında tutanak tutturulmadığı için tazminat kargo şirketinden alınamaz, satıcının cebinden çıkar. "
                           "Geç cevap vermek ise pazar yeri mağaza puanını düşürür. "
-                          "EsnafDoktor ayda sadece 2 sahte iadeyi ve 3 kargo tazminatını kurtardığında satıcıya en az 10.000 TL net nakit koruma sağlar. "
-                          "Satıcı tek seferlik 1.500 TL veya aylık 250 TL bakım ücretini tereddüt etmeden öder.",
+                          "EsnafDoktor rutin soruları saatler yerine ~2 saniyede yanıtlayarak mağaza puanını korur; "
+                          "riskli iadeleri gerekçesiyle satıcıya düşürerek tek bir sahte iadenin yazacağı zararı önler. "
+                          "Mesaj başına API ücreti olmadığından maliyet mesaj sayısıyla artmaz.",
         golden_punchline="EsnafDoktor esnafa harcama yaptırmaz; haksız iadeleri ve kargo hasarlarını önleyerek doğrudan net kârını kurtarır.",
         fn=fn, fn_bold=fn_bold
     ))
@@ -352,21 +354,21 @@ def build_pdf():
         q_num=7,
         judge_name="Arş. Gör. Mert İncidelen",
         criterion="Yaratıcılık & UX (%15)",
-        question_text="Paketleme yapan satıcı klavye kullanamaz. Kullanıcı deneyimini nasıl çözdünüz?",
+        question_text="Müşteri ve satıcı bu sistemi nasıl kullanıyor?",
         what_judge_measures="Uygulamanın masa başında değil sahada nasıl kullanılacağının düşünülüp düşünülmediği.",
-        full_score_answer="İki yönlü tam Sesli Asistan entegre ettik: "
-                          "<b>1) STT (Mikrofon):</b> Satıcı elinde koli bandı varken mikrofona tıklar ve müşterinin ses kaydını veya problemini söyler. "
-                          "Web Speech API bunu anında Türkçeye çevirir ve sistemi tetikler. "
-                          "<b>2) TTS (Sesli Yanıt):</b> Otomatik Seslendirme açık olduğunda asistan kararı ve aksiyonu satıcıya sesli olarak okur. "
-                          "Tek tıkla müşteriye WhatsApp yanıtı hazır linkle açılır ve A4 resmi servis tutanağı PDF olarak indirilir.",
-        golden_punchline="Satıcı elini klavyeye sürmeden mikrofona konuşur; asistan inceler, riskini tartar ve kararı kulağına fısıldar.",
+        full_score_answer="İki ekran var. <b>1) Müşteri sayfası:</b> ürün sayfasında 'Satıcıya sor' sohbeti ve yorum formu; "
+                          "müşteri soruyu yazar ya da sesle söyler, ~2 saniyede kurala dayalı yanıt alır. "
+                          "<b>2) Satıcı masası:</b> otomatik yanıtlananlar ve ona iletilen riskli vakalar; risk kaşesi, risk nedenleri, "
+                          "kontrol listesi, dayanak kural ve yerel modelin yazdığı düzenlenebilir taslak. J/K ile gezinir, E ile onaylar. "
+                          "Sesli karar özeti açıkken asistan kararı kısa bir cümleyle okur; kural kodu ve sipariş numarası gibi gürültüyü okumaz.",
+        golden_punchline="Müşteri saniyeler içinde cevap alır; satıcı sadece gerçekten kendisine gereken vakalarla uğraşır.",
         fn=fn, fn_bold=fn_bold
     ))
 
     story.append(PageBreak())
 
     # 3. 3-Minute Live Pitch Sequence & Cheat Sheet
-    story.append(Paragraph("⏱️ 3 DAKİKALIK JÜRİ SUNUM PLANI (CANLI PİTCH KRONOMETRESİ)", section_h1))
+    story.append(Paragraph("3 DAKİKALIK JÜRİ SUNUM PLANI (CANLI PİTCH KRONOMETRESİ)", section_h1))
     
     pitch_data = [
         [
@@ -377,35 +379,33 @@ def build_pdf():
         ],
         [
             Paragraph("<b>0:00 - 0:40</b><br/>(Giriş)", body_style),
-            Paragraph("E-ticaret butik satıcılarının her akşam yaşadığı iade ve uyuşmazlık krizini anlatın. "
-                      "Geciken yanıtların puan düşürdüğünü, sahte iadelerin kârı yok ettiğini belirtin. "
-                      "EsnafDoktor'un 0 TL maliyetle yerel çalıştığını söyleyin.", body_style),
-            Paragraph("Arayüzün üst bandını gösterin: <b>0.00 TL Değişken Maliyet</b> rozeti ve <b>Wi-Fi Kapalı</b> durumu.", body_style),
+            Paragraph("Problemi anlatın: e-ticarette satıcıya sorulan sorular saatlerce cevapsız kalıyor; geç cevap puanı düşürüyor, "
+                      "aceleyle verilen iade onayı zarar ettiriyor. EsnafDoktor'un yerel açık modelle 0 TL'ye çalıştığını söyleyin.", body_style),
+            Paragraph("Müşteri sayfasını açın; sağ üstte <b>Yerel · Gemma 3 4B</b> rozetini gösterin.", body_style),
             Paragraph("Temaya Uygunluk<br/><b>10/10</b>", body_style)
         ],
         [
             Paragraph("<b>0:40 - 1:40</b><br/>(Canlı Demo)", body_style),
-            Paragraph("Üstteki 4 canlı senaryodan <b>'2. Şüpheli İade (5.800 TL Mont)'</b> senaryosuna tıklayın. "
-                      "Ardından mikrofona basıp Türkçe sesle komut verin. "
-                      "TabPFN'in 18 ms'de Kırmızı Risk çıkardığını ve Gemma'nın hemen iade yerine inceleme adımı önerdiğini gösterin. "
-                      "Sesli Asistanın kararı okumasını dinletin.", body_style),
-            Paragraph("1. Butona tıkla.<br/>2. 🎙️ Mikrofona konuş.<br/>3. TabPFN Kırmızı Riski göster.<br/>4. 🔊 Kararı seslendir.", body_style),
+            Paragraph("Önce rutin bir soru sorun ('Kargom 5 gündür gelmedi'): analiz çipleri, dayanak kural ve ~2 sn'de gelen yanıtı gösterin. "
+                      "Sonra sert bir iade mesajı yazın ('Bir kere kullandım, etiketini kestim, paramı verin'): asistan iade sözü vermez, "
+                      "'Mağaza sahibine iletildi · Acil' notu çıkar. Satıcı masası sekmesine geçin; mesaj en üstte, risk kaşesi ve kontrol listesiyle.", body_style),
+            Paragraph("1. Rutin soru gönder.<br/>2. Riskli iade gönder.<br/>3. Satıcı masasına geç.<br/>4. Sesli karar özetini dinlet.", body_style),
             Paragraph("Teknik + UX<br/><b>10/10</b>", body_style)
         ],
         [
             Paragraph("<b>1:40 - 2:20</b><br/>(Bilimsel Kanıt)", body_style),
-            Paragraph("Sayfanın altındaki <b>'Jüri İçin Bilimsel Kanıtlar & Slayt 18'</b> sekmesini açın. "
-                      "Neden açık kaynak (0 TL, KVKK, Çevrimdışı)? "
-                      "Held-Out Gold test setinde %73-%88 dürüst F1 skorlarını gösterip veri sızıntısı olmadığını vurgulayın. "
-                      "PDF Raporu gösterin.", body_style),
-            Paragraph("Akordeonu açın, Slayt 18 karşılaştırma tablosunu ve Held-Out F1 metriklerini gösterin.", body_style),
+            Paragraph("Satıcı masasında <b>'Nasıl çalışıyor'</b> çekmecesini açın: hat, maliyet ve bulut API karşılaştırması. "
+                      "Ayrılmış test setinde %95 kategori doğruluğunu, kural düzeyinde %95,2 isabeti ve dayanak denetimini anlatın. "
+                      "Model seçiciden modelin değiştirilebildiğini (kilitlenme yok) gösterin.", body_style),
+            Paragraph("Çekmeceyi açın; ardından docs/metrics.md'yi gösterin.", body_style),
             Paragraph("Veri Bilimi<br/><b>10/10</b>", body_style)
         ],
         [
             Paragraph("<b>2:20 - 3:00</b><br/>(Kapanış & Q&A)", body_style),
-            Paragraph("Tek tıkla <b>WhatsApp Gönder</b> butonunu ve <b>A4 PDF Servis Tutanak Çıktısını</b> gösterip bitirin: "
-                      "<i>'EsnafDoktor; Google Gemma 4 ve TabPFN ile Türk e-ticaret satıcısını koruyan %100 açık kaynaklı bir copilot'tur. Sorularınızı almaktan onur duyarız.'</i>", body_style),
-            Paragraph("A4 Servis Raporunu indirip açın ve WhatsApp butonuna tıklayın.", body_style),
+            Paragraph("Taslağı onaylayıp (E) sıradaki vakaya geçerek bitirin: "
+                      "<i>'EsnafDoktor; satıcının kendi bilgisayarında çalışan açık ağırlıklı Gemma ile müşteriye saniyeler içinde, kurala dayalı yanıt veren "
+                      "MIT lisanslı bir asistandır. Sorularınızı almaktan onur duyarız.'</i>", body_style),
+            Paragraph("Satıcı masasında taslağı onaylayın.", body_style),
             Paragraph("Yazı & Bütünlük<br/><b>10/10</b>", body_style)
         ]
     ]
@@ -429,11 +429,11 @@ def build_pdf():
     checklist_data = [
         [
             Paragraph("<b>JÜRİ MASASINA OTURMADAN ÖNCE 5 MADDELİK ALTIN KONTROL LİSTESİ:</b><br/>"
-                      "1. <b>Laptop Wi-Fi'ını Kapatın:</b> Üst bantta 'Tamamen Çevrimdışı (Wi-Fi Kapalı)' rozeti yansın.<br/>"
+                      "1. <b>Sunucuyu Önceden Başlatın:</b> python server.py çalışsın, bir soru sorarak Gemma'yı ısıtın (ilk yanıt ~7 sn sürer). Satıcı masasında 'Demo verisini sıfırla'ya basın.<br/>"
                       "2. <b>Sesi Açın:</b> Sesli Asistan hoparlörden kararı okurken jüri net duysun.<br/>"
                       "3. <b>Raporu Hazır Tutun:</b> `EsnafDoktor_Teknik_Rapor.pdf` ve `EsnafDoktor_Juri_Savunma_Rehberi.pdf` masaüstünde hazır olsun.<br/>"
-                      "4. <b>Asla %100 Doğruluk İddia Etmeyin:</b> '%73.2 ve %88.0 aldık çünkü test setimiz izole sınır vakalarıdır' deyin.<br/>"
-                      "5. <b>TabPFN'i Savunun:</b> 'Metin Gemma'da, 5 sayısal sipariş parametresi TabPFN'de' cümlesini mutlaka kurun.", body_style)
+                      "4. <b>Sadece Ölçtüğünüzü Söyleyin:</b> '%95 kategori, %95,2 kural isabeti; betikle yeniden üretilebilir' deyin. BERTurk ve TabPFN'in bugünkü durumunu sorulursa dürüstçe anlatın.<br/>"
+                      "5. <b>Wi-Fi Kapalı Gösterecekseniz Önce Prova Edin:</b> modeller inik olmalı; sesle yazma internet ister, yazarak gösterin.", body_style)
         ]
     ]
     check_table = Table(checklist_data, colWidths=[WIDTH - (MARGIN * 2)])

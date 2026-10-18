@@ -1,95 +1,99 @@
 # 🏆 EsnafDoktor — Fırat Üniversitesi Jürisi İçin 10 Soru ve Cevap Rehberi
 **Hacktoberfest Elazığ 2026 · Week 2 "Side Hustle" Final Savunması**
 
-Bu belge, jüri sunumu sırasında gelebilecek en kritik 10 soruya verilecek doğrudan, teknik ve net yanıtları içerir.
+Bu belge, jüri sunumu sırasında gelebilecek en kritik 10 soruya verilecek doğrudan, teknik ve net yanıtları içerir. Buradaki her sayı repodaki betiklerle yeniden üretilebilir (`docs/metrics.md`).
 
 ---
 
 ### Soru 1: Çözdüğünüz problem nedir ve kime hitap ediyor?
 > **Cevap:**  
-> - **Problem:** E-ticaret yapan KOBİ ve satıcılar her gün onlarca iade, kargo hasarı ve uyuşmazlık mesajı alıyor. Yanıt vermekte gecikirlerse pazar yeri puanları düşüyor; haksız veya sahte iadeleri körü körüne onaylarlarsa doğrudan maddi zarar ediyorlar.  
-> - **Çözüm:** EsnafDoktor; gelen mesajı NLU ile anlayan, mağaza politikalarıyla eşleştiren, sipariş verilerinden suistimal riskini hesaplayan ve satıcıya anında aksiyon planı + hazır müşteri yanıtı sunan yerel bir asistandır.
+> - **Problem:** E-ticaret sitelerinde satıcıya sorulan sorular ("kargom nerede?", "beden değişebilir mi?", "iki kere çekildi") çoğu zaman saatlerce cevapsız kalıyor. Küçük satıcı siparişi de paketliyor, günde yüzlerce mesaja da yetişemiyor. Geç cevap mağaza puanını düşürüyor; aceleyle her iadeyi onaylamak ise sahte iadelere kapı açıyor.  
+> - **Çözüm:** EsnafDoktor gelen mesajı sınıflandırıyor, mağazanın kendi kuralıyla eşleştiriyor, sipariş verisinden risk hesaplıyor ve rutin soruları saniyeler içinde yerel modelle yanıtlıyor. Riskli olanları ise önerilen karar, kontrol listesi ve taslak yanıtla satıcıya iletiyor.
 
 ---
 
-### Soru 2: Google DeepMind Gemma 4 burada tam olarak nerede ve nasıl kullanılıyor?
+### Soru 2: Gemma burada tam olarak nerede ve nasıl kullanılıyor?
 > **Cevap:**  
-> Gemma 4 sistemin **Akıl Yürütme ve Karar Motoru**dur (Reasoning Hub):
-> 1. BERTürk'ün çıkardığı niyet ve kategoriyi alır.
-> 2. Hibrit RAG motorunun getirdiği resmi mağaza politikasını okur.
-> 3. TabPFN'in hesapladığı sipariş risk olasılığını değerlendirir.
-> 4. Satıcı için 3 somut çıktı üretir:
->    - **Aksiyon Kartı:** Satıcının atması gereken adım adım kontrol listesi.
->    - **Müşteri Yanıtı:** WhatsApp veya pazar yeri için hazır, kurallara uygun Türkçe yanıt.
->    - **Sesli Özet:** Satıcının işini aksatmadan dinleyebileceği 1 cümlelik sesli durum özeti.
+> **Gemma 3 4B** (açık ağırlıklı), Ollama ile satıcının kendi bilgisayarında çalışan **yanıt yazarıdır**:
+> 1. Hattın bulduğu mağaza kuralını ve müşterinin mesajını alır.
+> 2. Yalnızca o kurala dayanarak 3 cümleyi geçmeyen, "siz" diye hitap eden Türkçe bir yanıt yazar (müşteri sayfası) ya da satıcı için taslak hazırlar ("Yeniden yaz").
+> 3. Yazdığı yanıt bir **dayanak denetiminden** geçer (bkz. Soru 7).
+> 
+> Isınmış hâlde yanıt süresi ortalama **~1,4 sn**, GPU belleği **2,9 GB**. Karar (iade onayı/reddi) Gemma'ya bırakılmaz; o satıcıdadır. Model satıcı masasından tek tıkla değiştirilebilir (Qwen, Llama…).
 
 ---
 
 ### Soru 3: Neden kapalı bir bulut API (GPT-4o / Claude) değil de yerel açık kaynak?
 > **Cevap:**  
-> 1. **0 TL API Maliyeti:** Küçük işletmeler için değişken token faturaları sürdürülebilir değildir.  
-> 2. **Veri Gizliliği (KVKK):** Müşteri adresleri, telefonları ve sipariş verileri dış sunuculara gitmez; cihazda kalır.  
-> 3. **Çevrimdışı Çalışma:** İnternet kesilse bile yerel donanımda kesintisiz çalışır.  
-> 4. **Çok Modlu Hibrit Yapı:** Yalnızca metin değil, TabPFN ile tabüler sipariş riskini de yerelde birleştirir.
+> 1. **0 TL değişken maliyet:** Mesaj başına ödenen token faturası küçük işletme için sürdürülebilir değil; yerel model bilgisayar açık olduğu sürece bedava.  
+> 2. **Veri gizliliği (KVKK):** Müşteri adı, adresi, sipariş bilgisi yurt dışı sunuculara gitmez; diskte kalır.  
+> 3. **İnternetsiz çıkarım:** Modeller bir kez indirildikten sonra çıkarım tamamen yerelde yapılır.  
+> 4. **Kilitlenme yok:** Model ve fiyat sağlayıcıya bağlı değil; daha iyi bir açık model çıkınca değiştirilir.
 
 ---
 
 ### Soru 4: TabPFN burada ne iş yapıyor, LLM'den farkı ne ve hangi verilere dayanıyor?
 > **Cevap:**  
-> 1. **Resmi Kategori:** Yarışma şartnamesinde (Sayfa 20) doğrudan **200$ ödüllü 'Best Use of TabPFN'** partner kategorisi bulunmaktadır.  
-> 2. **Hangi Güvenilir Veriler?:** LLM'ler metin okur ama arka plandaki gerçeği bilmez. TabPFN ise sipariş sistemindeki 5 doğrulanmış tablo verisini inceler:
+> 1. **Resmi kategori:** Yarışma şartnamesinde (Sayfa 20) **200$ ödüllü 'Best Use of TabPFN'** partner kategorisi var.  
+> 2. **Hangi veriler?** LLM metin okur ama sipariş geçmişini bilmez. Risk modeli 5 tablo verisine bakar:
 >    - `Sipariş Tutarı`: 100 TL'lik kupa mı, 5.800 TL'lik mont mu?
->    - `Teslimat Süresi`: Taze teslimat mı, 14 günlük yasal sürenin son dakikası mı?
+>    - `Teslimat Süresi`
 >    - `Müşteri Geçmiş İade Oranı`: Sadık müşteri mi, sistematik iade istismarcısı mı?
 >    - `Kutu Açılış Videosu`: Var mı, yok mu?
->    - `Kargo Hasar Tutanağı`: Var mı, yok mu?
-> 3. **Karar Farkı:** TabPFN bu parametreleri CPU üzerinde 18 milisaniyede işleyerek matematiksel risk skoru üretir. Gemma bu risk kırmızı çıktığında müşteriye körü körüne para iadesi yapmaz; satıcıyı sahte iadelerden koruyacak inceleme adımlarını devreye sokar.
+>    - `Kargo Hasar Bildirimi`: Var mı, yok mu?
+> 3. **Bugünkü durum (dürüst):** TabPFN entegrasyonu kodda hazır; ancak güncel TabPFN sürümü ağırlıkları indirmek için PriorLabs lisans onayı istiyor. Onay verildikten sonra `ED_USE_TABPFN=1` ile açılıyor. O zamana kadar aynı 5 özellikten kalibre edilmiş bir lojistik formül kullanılıyor ve `/api/health` bunu açıkça `calibrated_rf_fallback` olarak gösteriyor.  
+> 4. **Karar farkı:** Risk yüksek çıktığında asistan müşteriye para iadesi sözü vermez; mesaj satıcıya "Acil" olarak düşer ve inceleme adımları önerilir.
 
 ---
 
-### Soru 5: RAG mimariniz neden 'eski usul RAG' değil, 2026 seviyesinde ne farkı var?
+### Soru 5: RAG mimariniz neden 'eski usul RAG' değil, ne farkı var?
 > **Cevap:**  
-> Standart RAG sistemleri yalnızca basit vektör benzerliği kullanır; bu da Türkçe eklemeli dilde ve 9 haneli kargo takip kodlarında başarısız olur.  
-> **İki Aşamalı Hibrit RAG Mimarimiz:**
-> - **1. Aşama (Hibrit Arama):** Türkçe Okapi BM25 (anahtar kelime) + Multilingual-E5 (anlamsal vektör) paralel çalışır.
-> - **2. Aşama (Rank Füzyonu):** Reciprocal Rank Fusion (RRF $k=60$) ile iki getirme listesi adil biçimde birleştirilir.
-> - **3. Aşama (Cross-Encoder):** Aday politikalar sorgu-doküman tam örtüşmesine göre yeniden sıralanır (Rerank).
-> - **4. Aşama (Self-RAG Guard):** Kural metninde dayanağı olmayan hiçbir sürenin veya bilginin üretilmesine izin verilmez.
+> Yalnızca vektör benzerliği kısa Türkçe kural metinlerinde yetersiz kalıyor. Bunu ölçtük:
+> - **BM25 (Türkçe normalize)** tek başına: kural Hit@1 **%81,0**
+> - **multilingual-e5-small** tek başına: **%71,4**
+> - **Hibrit BM25 + E5 + RRF (k=60):** **%81,0**
+> - **Bizim son aşama** — RRF + kuralın anahtar kelimeleri + Cross-Encoder'ı (mmarco mMiniLMv2) *yalnızca ağırlık* olarak kullanan yeniden sıralama: **%95,2** (21 mesajda 20)
+> 
+> Cross-Encoder'ı tek başına karar verici yaptığımızda başarı **17/21**'e düşüyordu; kısa Türkçe kurallarda skorları çok birbirine yakın. Bu yüzden onu sıralamayı ince ayarlayan bir sinyal olarak kullanıyoruz. Ablasyon: `python scripts/evaluate_honest_metrics.py`.
 
 ---
 
 ### Soru 6: Veri setiniz sentetik mi, gerçek mi? Veri sızıntısı (leakage) var mı?
 > **Cevap:**  
-> 1. BERTürk sınıflandırıcımız 18.000+ gerçek Türkçe e-ticaret ve şikayet verisiyle eğitilmiştir.
-> 2. Sentetik veri motorumuzda robotik şablonlar yerine 8 farklı kullanıcı davranışı ve mobil klavye yazım hatası (typo) içeren 3.000 satırlık gerçekçi bir set oluşturduk.
-> 3. Modeli tamamen izole edilmiş 20 zorlu sınır vakası (Held-Out Gold Set) üzerinde test ettik. Sonuçlarımız yapay bir %100 değil; gerçek dünya şartlarını yansıtan dürüst %73.2 - %88.0 F1 bandındadır.
+> 1. Değerlendirme, eğitimde hiç kullanılmamış **20 zorlu sınır vakasından** oluşan ayrılmış bir sette yapıldı (`data/holdout_gold.jsonl`).
+> 2. Sistemin kategori doğruluğu bu sette **%95,0** (macro F1 %93,8).
+> 3. İnce ayarlı BERTurk modellerimiz bu repoda değil; repoda çalışan NLU anahtar kelime yedeği ve tek başına %60 doğrulukta kalıyor. Bu yüzden arayüzde kategoriyi daha isabetli olan kural eşleşmesinden alıyoruz. BERTurk dosyaları `models/` klasörüne konduğunda otomatik devreye giriyor.
+> 4. Sentetik veri motoru, 8 farklı kullanıcı davranışı ve mobil klavye yazım hataları içeren 3.000 satırlık bir set üretiyor (`scripts/generate_realistic_synthetic.py`).
 
 ---
 
 ### Soru 7: Sistem kural uydurur veya yanlış bilgi (halüsinasyon) verirse ne olur?
 > **Cevap:**  
-> - Sistem satıcının yerine karar almaz; 'Öneri ve Kontrol Adımları' sunar.
-> - Self-RAG denetimi sayesinde Gemma'nın kararları doğrulanmış 16 mağaza politikasıyla birebir eşleştirilir; dayanağı olmayan süre (örn. 14 gün yerine 30 gün) üretilemez.
-> - Müşteriye gönderilecek mesaja ve nihai aksiyona her zaman satıcı onay verir.
+> - **Dayanak denetimi:** Gemma'nın yanıtındaki her sayı (gün, tutar, kod) eşleşen kural metninde ya da müşterinin mesajında geçmek zorunda. Geçmiyorsa yanıt daha katı bir talimatla bir kez yeniden yazdırılır; yine geçmezse kurala dayalı şablon yanıt gönderilir. Geliştirme sırasında Qwen'in "iade süreniz 7 gün" diye uydurduğu bir yanıtı bu denetim yakaladı.
+> - Test ettiğimiz 8 örnek soru ve yorumda Gemma 3 4B'nin 8 yanıtının 8'i denetimden ilk denemede geçti.
+> - **Sistem satıcının yerine karar almaz:** Kullanılmış ürün iadesi, öfkeli dil ya da yüksek risk gibi durumlarda müşteriye yalnızca "mağaza sahibine ilettim" yanıtı gider; kararı satıcı verir. Hasar ve ayıplı ürün durumunda model yalnızca fotoğraf ister.
 
 ---
 
 ### Soru 8: İnternet tamamen kopsa bu sistem gerçekten çalışır mı?
 > **Cevap:**  
-> Evet. BERTürk, TabPFN, E5 embedding ve Gemma modellerinin tümü bilgisayarın kendi donanımında yerel olarak çalışır. Sıfır dış ağ veya bulut API çağrısı vardır.
+> Evet, modeller bir kez indirildikten sonra. Gemma (Ollama), E5, Cross-Encoder, NLU ve risk modeli bilgisayarın kendi donanımında çalışıyor; hiçbir bulut API çağrısı yok.  
+> İki istisnayı açıkça söylüyoruz: tarayıcının **sesle yazma** özelliği (Chrome/Edge) sesi bulut servisine gönderiyor, sayfa yazı tipleri de internetsizken sistem yazı tiplerine düşüyor. Yanıtları sesli okuma ise tamamen yerel.
 
 ---
 
 ### Soru 9: Bu sistemin işletmeye somut ekonomik faydası nedir? (İş Modeli)
 > **Cevap:**  
-> - Haksız kabul edilen tek bir sahte iade veya tutanaksız kargo hasarı doğrudan satıcının kâr marjını yok eder.
-> - EsnafDoktor, ayda birkaç hatalı iadeyi veya kargo tazminat hakkını kurtararak işletmeye doğrudan binlerce liralık nakit koruma sağlar ve mağaza puanının düşmesini engeller.
+> - Rutin soruların (kargo, beden, iade süresi, çift çekim) cevabı saatler yerine **~2 saniyede** gidiyor; mağaza puanı korunuyor.
+> - Haksız kabul edilen tek bir sahte iade ya da tutanaksız kargo hasarı satıcının kâr marjını yok eder. Riskli vakaların satıcıya gerekçesiyle düşmesi bu kaybı önler.
+> - Mesaj başına API ücreti olmadığı için maliyet mesaj sayısıyla artmıyor.
 
 ---
 
 ### Soru 10: Açık kaynak dünyasına ve topluluğa somut katkınız nedir?
 > **Cevap:**  
-> 1. MIT lisanslı, uçtan uca çalışan açık kaynak bir repo.
-> 2. Türk e-ticaret ekosistemi için 16 maddelik standart hukuki ve operasyonel politika veri seti.
-> 3. Gerçekçi davranışlar ve yazım hataları içeren açık kaynak sentetik veri üretim motoru.
-> 4. Gemma 4 akıl yürütmesi ile TabPFN tabüler risk modelini yerelde birleştiren ilk mimari referansı.
+> 1. MIT lisanslı, uçtan uca çalışan açık kaynak bir repo (FastAPI + sade HTML/CSS/JS arayüz).
+> 2. Türk e-ticareti için 16 maddelik hukuki ve operasyonel politika veri seti.
+> 3. Kural düzeyinde ölçülen, ablasyonu yeniden üretilebilir bir Türkçe hibrit RAG.
+> 4. Küçük açık modellerin kural uydurmasını yakalayan basit, açıklanabilir bir dayanak denetimi.
+> 5. Gerçekçi davranışlar ve yazım hataları içeren açık kaynak sentetik veri üretim motoru.
