@@ -39,7 +39,7 @@
     "category": "iade",
     "title": "Kullanılmış, Yıkanmış veya Etiketi Sökülmüş Ürün İade Reddi",
     "text": "Deneme amacıyla giyilmek dışında dışarıda kullanılmış, yıkanmış, parfüm veya sigara kokusu sinmiş ya da orijinal marka etiketi koparılmış ürünlerin iadesi kesinlikle kabul edilmez. Mağazamıza bu şekilde gelen ürünler tutanak tutularak müşteriye karşı ödemeli geri kargolanır.",
-    "keywords": ["kullanilmis", "yikanmis", "etiket kopuk", "parfum kokusu", "giyilmis", "ikinci el"]
+    "keywords": ["kullanilmis", "yikanmis", "etiket kopuk", "parfum kokusu", "giyilmis", "ikinci el", "kullandim", "etiketini kestim", "etiketi kestim", "giydim", "yikadim"]
   },
   {
     "id": "POL_IADE_04",
@@ -53,14 +53,14 @@
     "category": "iade",
     "title": "Para İadesinin Banka Hesabına veya Kredi Kartına Yansıma Süresi",
     "text": "İade edilen ürün mağaza depomuza ulaşıp onaylandıktan sonra 24 saat içinde bankaya iade talimatı verilir. İade tutarının müşterinin ekstresine yansıması bankaların takas prosedürlerine bağlı olarak kredi kartlarında 1-3 iş günü, banka (debit) kartlarında ise 2-7 iş günü sürebilmektedir. Taksitli alışverişlerde bankalar iadeyi ekstreye taksitli olarak yansıtabilir.",
-    "keywords": ["para yatmadi", "ucret iadesi", "hesaba gecmedi", "kartima yansimadi", "parami verin", "taksit iadesi"]
+    "keywords": ["para yatmadi", "ucret iadesi", "hesaba gecmedi", "kartima yansimadi", "parami verin", "taksit iadesi", "iadem", "hesabima gecmedi", "ne zaman gecer"]
   },
   {
     "id": "POL_URUN_01",
     "category": "urun",
     "title": "Ayıplı Mal, Fabrikasyon Hata ve Birebir Değişim",
     "text": "Ürünün dikiş hatası, taban ayrılması, yırtık kumaş veya çalışmayan elektronik aksam gibi üretim kaynaklı kusurlu olması durumunda müşteri hiçbir kargo ücreti ödemeden birebir değişim veya para iadesi talep edebilir. Kusurlu ürün bildirimi teslimattan itibaren 30 gün içinde yapılmalıdır.",
-    "keywords": ["ayipli", "kusurlu", "defolu", "bozuk", "dikisi sokuk", "tabani ayrilmis", "degisim"]
+    "keywords": ["ayipli", "kusurlu", "defolu", "bozuk", "dikisi sokuk", "tabani ayrilmis", "degisim", "sokuldu", "sokuk", "tabani ayrildi"]
   },
   {
     "id": "POL_URUN_02",
@@ -81,7 +81,7 @@
     "category": "teknik",
     "title": "Ödeme Hataları ve Mükerrer (Çift) Çekim Sorunları",
     "text": "Sipariş oluşturma esnasında banka 3D Secure ekranında zaman aşımı veya bağlantı kopması yaşanırsa sipariş oluşmadan provizyonda çekim görünebilir. Mükerrer çekim durumunda banka provizyon referans kodu incelenir ve askıda kalan tutar 24 saat içinde sistemimizce otomatik iptal/iade edilir.",
-    "keywords": ["cift cekti", "iki kere cekildi", "kartimdan para gitti siparis yok", "3d secure", "odeme hatasi"]
+    "keywords": ["cift cekti", "iki kere cekildi", "kartimdan para gitti siparis yok", "3d secure", "odeme hatasi", "iki kez cekildi"]
   },
   {
     "id": "POL_TEKNIK_02",

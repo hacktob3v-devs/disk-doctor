@@ -7,6 +7,7 @@ to calculate calibrated dispute, churn, and return abuse probabilities in <20ms 
 """
 from __future__ import annotations
 
+import os
 import time
 from typing import Any
 
@@ -71,6 +72,13 @@ _model_initialized = False
 def _init_tabpfn():
     global _tabpfn_model, _model_initialized
     if _model_initialized:
+        return
+
+    # TabPFN >= 2.5 needs a one-time PriorLabs license acceptance to download weights.
+    # Without it, it opens a browser login and waits on stdin, so only try when asked.
+    if os.getenv("ED_USE_TABPFN", "0") != "1":
+        _tabpfn_model = None
+        _model_initialized = True
         return
 
     try:

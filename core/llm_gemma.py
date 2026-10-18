@@ -92,7 +92,9 @@ def generate_action_card(
         )
 
     elif category == "kargo":
-        if "hasar" in customer_message.lower() or "kirik" in customer_message.lower():
+        msg_low = customer_message.lower()
+        damage_policy = bool(top_evidence and top_evidence["policy_id"] == "POL_KARGO_02")
+        if damage_policy or any(w in msg_low for w in ("hasar", "kirik", "kırık", "kırıl", "ezik", "ezil")):
             suggested_action = "Kargo Hasar Tespit Zaptı İste & Kargo Tazmin Dosyası Aç"
             instructions = [
                 "Müşteriden kargo paketi ve ürünün hasarlı kısımlarının net fotoğraflarını isteyin.",

@@ -23,6 +23,13 @@ import numpy as np
 
 from core.contracts import RAGResult, RetrievedEvidence
 
+# transformers 5.x loads weights on a thread pool, which intermittently segfaults
+# on Windows when TabPFN/torch are imported in the same process. Load sequentially.
+os.environ.setdefault("HF_DEACTIVATE_ASYNC_LOAD", "1")
+
+RERANK_POOL = 16
+CE_WEIGHT = 0.5
+
 ROOT_DIR = Path(__file__).resolve().parents[1]
 POLICIES_PATH = ROOT_DIR / "data" / "policies.json"
 LOCAL_EMB_PATH = ROOT_DIR.parent / "disk-doctor" / "models" / "rag" / "embedding"
@@ -178,23 +185,25 @@ class AdvancedRAGEngine:
             })
 
         fused_candidates.sort(key=lambda x: x["rrf_score"], reverse=True)
-        top_candidates = fused_candidates[:max(5, top_k)]
+        # The policy corpus is small, so every policy is re-ranked
+        top_candidates = fused_candidates[:max(RERANK_POOL, top_k)]
 
-        # 4. Cross-Encoder Re-Ranking
+        # 4. Re-Ranking: fused lexical/semantic score + policy keyword bonus,
+        #    nudged by the multilingual Cross-Encoder. The Cross-Encoder alone is too
+        #    flat on short Turkish policies to decide (17/21 vs 20/21 policy Hit@1 on
+        #    the colloquial set in scripts/evaluate_rag_policy.py), so it only re-weights.
         t_rerank_start = time.perf_counter()
+        q_norm = _normalize(query)
+        for c in top_candidates:
+            kw_bonus = sum(2.0 for kw in c["policy"].get("keywords", []) if kw in q_norm)
+            c["rerank_score"] = c["rrf_score"] * 10.0 + kw_bonus + (c["dense_score"] * 2.0)
         if self.reranker_model is not None:
             pairs = [[query, f"{c['policy']['title']}: {c['policy']['text']}"] for c in top_candidates]
-            ce_scores = self.reranker_model.predict(pairs)
-            for c, ce_score in zip(top_candidates, ce_scores):
-                c["rerank_score"] = float(ce_score)
-            top_candidates.sort(key=lambda x: x["rerank_score"], reverse=True)
-        else:
-            # Heuristic high-precision semantic re-ranking fallback
-            q_norm = _normalize(query)
-            for c in top_candidates:
-                kw_bonus = sum(2.0 for kw in c["policy"].get("keywords", []) if kw in q_norm)
-                c["rerank_score"] = c["rrf_score"] * 10.0 + kw_bonus + (c["dense_score"] * 2.0)
-            top_candidates.sort(key=lambda x: x["rerank_score"], reverse=True)
+            ce_scores = np.asarray(self.reranker_model.predict(pairs), dtype=float)
+            ce_z = (ce_scores - ce_scores.mean()) / (ce_scores.std() + 1e-6)
+            for c, z in zip(top_candidates, ce_z):
+                c["rerank_score"] += CE_WEIGHT * float(z)
+        top_candidates.sort(key=lambda x: x["rerank_score"], reverse=True)
 
         t_rerank = (time.perf_counter() - t_rerank_start) * 1000
 

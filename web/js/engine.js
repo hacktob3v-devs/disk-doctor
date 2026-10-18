@@ -222,7 +222,8 @@ window.ED_ENGINE = (function () {
       customerReply = nlu.intent === "tesekkur"
         ? `${c.first}, değerlendirmeniz için çok teşekkür ederiz. Ürününüzü güzel günlerde kullanmanızı dileriz. ${shop}`
         : `${c.first}, yaşadığınız sorun için özür dileriz. Konuyu çözmek için size özel mesajla ulaştık; mağaza sahibimiz bizzat ilgileniyor. ${shop}`;
-    } else if (escalate && !book.escalate) {
+    } else if (escalate && !["POL_KARGO_02", "POL_URUN_01"].includes(policyId)) {
+      // Kanıt istenebilecek durumlar dışında ret/onay kararını satıcı verir
       customerReply = `Merhaba ${c.first}, mesajınızı aldım ve mağaza sahibimize öncelikli olarak ilettim. ${P[policyId].title} kapsamında değerlendirilecek; destek saatlerimiz içinde (09:00-19:00) size buradan dönüş yapılacak. ${shop}`;
     }
 

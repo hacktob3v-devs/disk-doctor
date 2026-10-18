@@ -80,7 +80,12 @@ window.ED_POLICIES = {
       "etiket kopuk",
       "parfum kokusu",
       "giyilmis",
-      "ikinci el"
+      "ikinci el",
+      "kullandim",
+      "etiketini kestim",
+      "etiketi kestim",
+      "giydim",
+      "yikadim"
     ]
   },
   "POL_IADE_04": {
@@ -105,7 +110,10 @@ window.ED_POLICIES = {
       "hesaba gecmedi",
       "kartima yansimadi",
       "parami verin",
-      "taksit iadesi"
+      "taksit iadesi",
+      "iadem",
+      "hesabima gecmedi",
+      "ne zaman gecer"
     ]
   },
   "POL_URUN_01": {
@@ -119,7 +127,10 @@ window.ED_POLICIES = {
       "bozuk",
       "dikisi sokuk",
       "tabani ayrilmis",
-      "degisim"
+      "degisim",
+      "sokuldu",
+      "sokuk",
+      "tabani ayrildi"
     ]
   },
   "POL_URUN_02": {
@@ -156,7 +167,8 @@ window.ED_POLICIES = {
       "iki kere cekildi",
       "kartimdan para gitti siparis yok",
       "3d secure",
-      "odeme hatasi"
+      "odeme hatasi",
+      "iki kez cekildi"
     ]
   },
   "POL_TEKNIK_02": {

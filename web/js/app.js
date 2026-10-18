@@ -7,11 +7,8 @@
   const INTENT = { sikayet: "Şikâyet", bilgi_talebi: "Bilgi talebi", tesekkur: "Teşekkür" };
   const PRIORITY = { acil: "Acil", yuksek: "Yüksek öncelik", orta: "Normal", dusuk: "Düşük" };
   const LEVEL = { green: "Güvenli", yellow: "İncele", red: "Yüksek risk" };
-  const MODELS = {
-    "gemma3:4b": "Gemma 3 4B",
-    "qwen2.5:7b": "Qwen 2.5 7B",
-    "llama3.2:3b": "Llama 3.2 3B"
-  };
+  const API = window.ED_API;
+  const modelName = () => API.prettyModel(state.model) || "Yerel model";
 
   const ICON = {
     copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',
@@ -46,7 +43,7 @@
     filter: "all",
     query: "",
     editing: false,
-    model: "gemma3:4b",
+    model: window.ED_API.preferredModel() || "",
     runToken: 0
   };
 
@@ -182,7 +179,7 @@
       { name: "Mesajı anlama", detail: `${CATEGORY[a.category]} · ${INTENT[a.intent]} · güven %${Math.round(a.confidence * 100)}`, ms: a.timings.nlu, model: "BERTurk" },
       { name: "Mağaza kuralını bulma", detail: `${a.policyId} · ${p.title}`, ms: a.timings.rag, model: "BM25 + E5" },
       { name: "Sipariş riskini hesaplama", detail: `%${Math.round(a.risk.score * 100)} · ${LEVEL[a.risk.level]}`, ms: a.timings.risk, model: "TabPFN" },
-      { name: "Karar ve yanıt taslağı", detail: `${MODELS[state.model]} · Ollama`, ms: a.timings.llm, model: MODELS[state.model] }
+      { name: "Karar ve yanıt taslağı", detail: `${modelName()} · Ollama`, ms: a.timings.llm, model: modelName() }
     ];
   }
 
@@ -296,7 +293,44 @@
     tick();
   }
 
-  /* ---------------- Risk yeniden hesap (prototip) ---------------- */
+  /* ---------------- Yerel sunucu ile yeniden değerlendirme ---------------- */
+
+  async function reevaluate(c) {
+    renderCase();
+    const a = await API.analyze(c.message, { order: c.order, customer: c.customer, shop: "Usta Deri" });
+    if (a.backend) {
+      c.analysis = { ...a, risk: { ...a.risk } };
+      if (!c.auto) c.draft = a.reply;
+      c.checks = [];
+    } else {
+      recomputeRisk(c);
+    }
+    if (current() !== c) return;
+    renderCase();
+    runAnalysis();
+    toast("Sipariş bilgisi güncellendi, yeniden değerlendirildi");
+  }
+
+  async function regenerate(c) {
+    const box = $("#reply");
+    const count = $("#replyCount");
+    box.value = "";
+    count.textContent = "Yerel model yazıyor, kural denetleniyor…";
+    const p = POLICIES[c.analysis.policyId];
+    const res = await API.generateReply({
+      message: c.message, policyTitle: p.title, policyText: p.text,
+      customer: c.customer, merchant: "Usta Deri", audience: "merchant_draft", model: state.model || null
+    });
+    const ok = res && res.text;
+    c.draft = ok ? res.text : c.analysis.reply;
+    if (current() !== c) return;
+    box.value = c.draft;
+    count.textContent = ok
+      ? `${API.prettyModel(res.model)} · kural denetimi ✓`
+      : res && res.model ? "Model kural dışı bilgi yazdı · şablon yanıt" : "Model kapalı · şablon yanıt";
+  }
+
+  /* ---------------- Risk yeniden hesap (sunucusuz önizleme) ---------------- */
 
   function recomputeRisk(c) {
     const o = c.order;
@@ -396,7 +430,7 @@
         <li><div><div class="p-name">Mesajı anlama</div><div class="p-desc">Kategori ve niyet; Türkçe e-ticaret verisiyle ince ayarlı.</div></div><div class="p-model">BERTurk</div></li>
         <li><div><div class="p-name">Mağaza kuralını bulma</div><div class="p-desc">Anahtar kelime ve anlam araması birleştirilir, en uygun kural seçilir.</div></div><div class="p-model">BM25 + E5<br>RRF · rerank</div></li>
         <li><div><div class="p-name">Sipariş riskini hesaplama</div><div class="p-desc">Tutar, iade geçmişi, açılış videosu ve kargo verisinden olasılık.</div></div><div class="p-model">TabPFN</div></li>
-        <li><div><div class="p-name">Karar ve yanıt taslağı</div><div class="p-desc">Yalnızca bulunan kurala dayanır; kuralda olmayan süre veya tutar yazmaz.</div></div><div class="p-model">${MODELS[state.model]}<br>Ollama</div></li>
+        <li><div><div class="p-name">Karar ve yanıt taslağı</div><div class="p-desc">Yalnızca bulunan kurala dayanır; kuralda olmayan süre veya tutar yazmaz.</div></div><div class="p-model">${modelName()}<br>Ollama</div></li>
       </ol>
 
       <h3>Bu ay</h3>
@@ -464,10 +498,7 @@
       if (state.editing) {
         document.querySelectorAll("#casePane input[data-field]").forEach((inp) => { c.order[inp.dataset.field] = Math.max(0, Number(inp.value) || 0); });
         state.editing = false;
-        recomputeRisk(c);
-        renderCase();
-        runAnalysis();
-        toast("Sipariş bilgisi güncellendi, yeniden değerlendirildi");
+        reevaluate(c);
       } else {
         state.editing = true;
         renderCase();
@@ -495,7 +526,7 @@
       box.hidden = !box.hidden;
       e.target.textContent = box.hidden ? "Kural metnini göster" : "Kural metnini gizle";
     }
-    if (act === "regen") { c.draft = c.analysis.reply; runAnalysis(); }
+    if (act === "regen") regenerate(c);
   });
 
   $("#decisionPane").addEventListener("change", (e) => {
@@ -515,8 +546,21 @@
 
   $("#modelSelect").addEventListener("change", (e) => {
     state.model = e.target.value;
-    toast(`Yanıt modeli: ${MODELS[state.model]}`);
-    if (current()) runAnalysis();
+    API.setPreferredModel(state.model);
+    toast(`Yanıt modeli: ${modelName()}`);
+  });
+
+  // Kurulu yerel modelleri seçiciye doldur
+  API.health().then((h) => {
+    const sel = $("#modelSelect");
+    if (!h || !h.llm.available) {
+      sel.innerHTML = `<option value="">${h ? "Model kapalı" : "Sunucusuz önizleme"}</option>`;
+      sel.disabled = true;
+      return;
+    }
+    if (!h.llm.installed.includes(state.model)) state.model = h.llm.model;
+    sel.innerHTML = h.llm.installed.map((m) => `<option value="${esc(m)}"${m === state.model ? " selected" : ""}>${esc(API.prettyModel(m))}</option>`).join("");
+    if (current()) { const t = $("#trace"); if (t) t.innerHTML = traceItems(current(), -1); }
   });
 
   $("#openHow").addEventListener("click", openHow);

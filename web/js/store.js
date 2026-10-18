@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const ENGINE = window.ED_ENGINE;
+  const API = window.ED_API;
   const SHARED = window.ED_SHARED;
   const P = window.ED_POLICIES;
 
@@ -95,6 +95,11 @@
     return el;
   }
 
+  function setFoot(el, html) {
+    const foot = el.querySelector(".msg-foot");
+    foot.insertAdjacentHTML("afterbegin", html + '<span class="sep">·</span>');
+  }
+
   function addCustomer(text, stars) {
     const el = document.createElement("div");
     el.className = "msg msg-me";
@@ -155,33 +160,65 @@
     autosize();
 
     const t0 = performance.now();
-    const a = ENGINE.analyze(text, {
+    const tEl = typing();
+    const stage = tEl.querySelector("[data-stage]");
+    const a = await API.analyze(text, {
       order: { ...o, ...HISTORY },
       mode, stars, customer: CUSTOMER, shop: "Usta Deri"
     });
 
     // Hattın aşamalarını kısaca göster
-    const tEl = typing();
-    const stage = tEl.querySelector("[data-stage]");
-    await sleep(260); stage.textContent = `Sınıflandırıldı: ${CATEGORY[a.category]} · ${INTENT[a.intent]}`;
     const an = meEl.querySelector(".analysis");
     an.innerHTML = analysisHtml(a);
     an.hidden = !$("#showAnalysis").checked;
-    await sleep(300); stage.textContent = `Kural bulundu: ${P[a.policyId].title}`;
-    await sleep(260); stage.textContent = "Yanıt yazılıyor…";
-    await sleep(380);
-    tEl.remove();
+    stage.textContent = `Sınıflandırıldı: ${CATEGORY[a.category]} · ${INTENT[a.intent]}`;
+    await sleep(240);
+    stage.textContent = `Kural bulundu: ${a.policyTitle}`;
+    await sleep(240);
+    stage.textContent = a.holdingReply ? "Mağaza sahibine iletiliyor…" : "Yanıt yazılıyor, kurala uygunluğu denetleniyor…";
+
+    let replyEl = null;
+    let bubble = null;
+    const open = () => {
+      if (bubble) return;
+      tEl.remove();
+      replyEl = addShop("");
+      bubble = replyEl.querySelector(".bubble");
+    };
+
+    let sent;
+    let modelUsed = "";
+    let source;
+    if (a.holdingReply) {
+      sent = a.holdingReply;
+      source = "iletim mesajı";
+    } else {
+      const res = await API.generateReply({
+        message: text, policyTitle: a.policyTitle, policyText: a.policyText,
+        mode, stars, customer: CUSTOMER, merchant: "Usta Deri"
+      });
+      if (res && res.text) {
+        sent = res.text;
+        modelUsed = res.model;
+        source = `${API.prettyModel(res.model)} · kural denetimi ✓`;
+      } else {
+        // Yerel model kapalı ya da yanıt kural denetiminden geçmedi
+        sent = a.backend ? a.reply : a.customerReply;
+        source = res && res.model ? "şablon yanıt (model kural dışı bilgi yazdı)" : "şablon yanıt";
+      }
+    }
+    open();
+    await streamInto(bubble, sent);
+    if ($("#autoSpeak").checked) SHARED.speak(sent);
 
     const latency = performance.now() - t0;
     state.latencies.push(latency);
-
-    const foot = [
-      `<span>Dayanak: ${esc(P[a.policyId].title)}</span>`,
-      `<span class="num">${(latency / 1000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })} sn</span>`
-    ].join("<span class=\"sep\">·</span>");
-    const reply = addShop("", { foot });
-    await streamInto(reply.querySelector(".bubble"), a.customerReply);
-    if ($("#autoSpeak").checked) SHARED.speak(a.customerReply);
+    a.timings.llm = Math.round(latency - (a.timings.nlu + a.timings.rag + a.timings.risk));
+    setFoot(replyEl, [
+      `<span>Dayanak: ${esc(a.policyTitle)}</span>`,
+      `<span class="num">${(latency / 1000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })} sn</span>`,
+      `<span>${esc(source)}</span>`
+    ].join('<span class="sep">·</span>'));
 
     if (a.escalate) {
       thread.insertAdjacentHTML("beforeend", `
@@ -193,7 +230,7 @@
     }
 
     if (mode === "review") {
-      REVIEWS.unshift({ name: "Deniz A.", stars, text, reply: a.customerReply, when: "az önce", fresh: true });
+      REVIEWS.unshift({ name: "Deniz A.", stars, text, reply: sent, when: "az önce", fresh: true });
       renderReviews();
       setMode("question");
     }
@@ -207,10 +244,10 @@
       unread: a.escalate,
       message: text,
       order: { id: o.id, product: o.product, amount: o.amount, deliveryDays: o.deliveryDays, unboxingVideo: o.unboxingVideo, boxDamaged: o.boxDamaged, ...HISTORY },
-      analysis: { ...a, reply: a.escalate ? a.reply : a.customerReply },
+      analysis: { ...a, reply: a.escalate ? a.reply : sent, model: modelUsed },
       done: !a.escalate,
       auto: !a.escalate,
-      sentReply: a.customerReply,
+      sentReply: sent,
       kind: mode
     });
 
@@ -312,6 +349,19 @@
   });
 
   /* ---------------- Başlat ---------------- */
+
+  API.health().then((h) => {
+    const chip = $("#modelChip");
+    const model = API.preferredModel() && h && h.llm.installed.includes(API.preferredModel()) ? API.preferredModel() : h && h.llm.model;
+    if (h && h.llm.available) {
+      $("#modelLabel").textContent = `Yerel · ${API.prettyModel(model)}`;
+      chip.title = "Yanıtlar bu bilgisayarda çalışan açık ağırlıklı modelden gelir";
+    } else {
+      chip.classList.add("is-online");
+      $("#modelLabel").textContent = h ? "Model kapalı · şablon yanıt" : "Sunucusuz önizleme";
+      chip.title = h ? "Ollama çalışmıyor; kurala dayalı şablon yanıtlar kullanılıyor" : "server.py çalışmıyor; tarayıcı içi taklit motor kullanılıyor";
+    }
+  });
 
   renderOrders();
   renderReviews();

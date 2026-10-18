@@ -124,14 +124,20 @@ pytest tests/ -v
 ```
 *(All 7 comprehensive and adversarial tests pass with zero network calls!)*
 
-### 3. Launch the Web Interface (prototype)
+### 3. Launch the Web Interface
 ```bash
-python -m http.server 5180 --directory web
+ollama pull gemma3:4b        # or any local model; qwen2.5:7b-instruct also works
+python server.py
 ```
-- `http://localhost:5180/` — customer view: ask the seller or write a review, get an instant classified answer
-- `http://localhost:5180/satici.html` — seller desk: escalated messages, risk stamp, action checklist
+- `http://127.0.0.1:8000/` — customer view: ask the seller or write a review; the message is classified, matched to a store policy and answered by the local model
+- `http://127.0.0.1:8000/satici.html` — seller desk: handed-off messages, risk stamp, action checklist, model-written draft
+- `http://127.0.0.1:8000/api/health` — which components are really running
 
-The prototype currently runs a rule-based in-browser stand-in (`web/js/engine.js`) for the `core/` pipeline. After editing `data/policies.json`, run `python scripts/build_web_policies.py`.
+Replies are checked against the matched policy: a reply that states a number (days, amounts, codes) not found in the policy is regenerated once, then replaced by the rule-based template. Refunds and rejections are never decided by the model; those messages get a holding reply and go to the seller.
+
+Set `ED_GEMMA_MODEL` to choose the default model. Real TabPFN inference needs a one-time PriorLabs license acceptance; after that, run with `ED_USE_TABPFN=1` (otherwise the calibrated logistic fallback is used and `/api/health` says so).
+
+Without `server.py`, the pages still open from `web/` with a rule-based in-browser stand-in (`web/js/engine.js`). After editing `data/policies.json`, run `python scripts/build_web_policies.py`; `python scripts/evaluate_rag_policy.py` reports policy-level retrieval accuracy.
 
 ---
 
