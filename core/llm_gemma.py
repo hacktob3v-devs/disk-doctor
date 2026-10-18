@@ -2,7 +2,7 @@
 EsnafDoktor - Local Gemma & Open-Weight LLM Resolution Engine
 Hacktoberfest Elazığ 2026 - Week 2 "Side Hustle"
 
-Connects to local Ollama (Gemma 4 / Gemma 3:1b) with loopback-only HTTP requests.
+Connects to local Ollama (default gemma3:4b, set ED_GEMMA_MODEL) with loopback-only HTTP requests.
 Includes zero-hallucination grounded template engine as resilient fallback.
 Guarantees 100% offline operation, 0 TL API cost, and strict policy adherence.
 """
@@ -18,7 +18,7 @@ from typing import Any
 from core.contracts import ActionCard, NLUResult, RAGResult, TabularRiskResult
 
 OLLAMA_HOST = os.getenv("ED_OLLAMA_HOST", "http://127.0.0.1:11434")
-GEMMA_MODEL = os.getenv("ED_GEMMA_MODEL", "gemma3:1b")
+GEMMA_MODEL = os.getenv("ED_GEMMA_MODEL", "gemma3:4b")
 GENERATE_LLM = os.getenv("ED_GENERATE_LLM", "0") == "1"
 
 

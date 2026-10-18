@@ -23,7 +23,7 @@ from core.tabpfn_dispute import evaluate_order_risk
 
 Mode = Literal["question", "review"]
 
-DEFAULT_MODEL = os.getenv("ED_GEMMA_MODEL", "gemma3:1b")
+DEFAULT_MODEL = os.getenv("ED_GEMMA_MODEL", "gemma3:4b")
 
 # Policies whose resolution needs evidence or a judgement call from the merchant
 HANDOFF_POLICIES = {"POL_KARGO_02", "POL_IADE_03", "POL_URUN_01"}
@@ -164,7 +164,9 @@ def reply_prompt(
         f"Sen {merchant} adlı küçük bir e-ticaret mağazasının müşteri temsilcisisin. "
         "Yalnızca verilen mağaza kuralındaki bilgileri kullan. Kuralda yazmayan hiçbir süre, gün, tutar, "
         "ücret, kod, koşul veya söz ekleme; emin olmadığın konuda mağaza sahibinin dönüş yapacağını söyle. "
-        "2-4 kısa cümlelik, sade, samimi ve saygılı bir Türkçe yaz. Emoji, madde işareti, başlık kullanma. "
+        "En fazla 3 kısa cümlelik, sade, samimi ve saygılı bir Türkçe yaz; müşteriye hep 'siz' diye hitap et. "
+        "Müşteriyi suçlama, ona kural hatırlatma; mağazanın ne yapacağını ya da müşterinin atacağı adımı söyle. "
+        "Emoji, madde işareti, başlık kullanma. "
         f"'Merhaba <müşterinin ilk adı>,' diye başla ve yanıtı yalnızca '{merchant}' imzasıyla bitir."
     )
     kind = f"{stars} yıldızlı ürün yorumu (herkese açık yanıt yaz)" if mode == "review" else "satıcıya soru"
